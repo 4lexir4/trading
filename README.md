@@ -1,1 +1,1 @@
-# Quant trading infrastructure for testing algorithms against replicated crypto order books.
+# Infrastructure for testing trading algorithms against
