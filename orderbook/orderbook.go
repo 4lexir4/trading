@@ -1,7 +1,7 @@
 package orderbook
 
 import (
-	"crypto/rand"
+	"math/rand"
 	"time"
 )
 
@@ -28,7 +28,7 @@ type Order struct {
 
 func NewOrder(isBid bool, size float64) *Order {
 	return &Order{
-		id:        rand.Intn(100_000), // TODO fix later...
+		id:        rand.Int63n(100_000), // TODO fix later...
 		size:      size,
 		timestamp: time.Now().UnixNano(),
 		isBid:     isBid,
