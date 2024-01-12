@@ -19,11 +19,22 @@ func NewLimit(price float64) *Limit {
 
 }
 
+func (l *Limit) addOrder(o *Order) {
+	l.orders = append(l.orders, o)
+	o.limitIndex = len(l.orders)
+	l.totalVolume += o.size
+}
+
+func (l *Limit) deleteOrder(o *Order) {
+
+}
+
 type Order struct {
-	id        int64
-	size      float64
-	timestamp int64
-	isBid     bool
+	id         int64
+	size       float64
+	timestamp  int64
+	isBid      bool
+	limitIndex int
 }
 
 func NewOrder(isBid bool, size float64) *Order {
