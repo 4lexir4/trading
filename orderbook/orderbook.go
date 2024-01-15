@@ -20,13 +20,17 @@ func NewLimit(price float64) *Limit {
 }
 
 func (l *Limit) addOrder(o *Order) {
-	l.orders = append(l.orders, o)
 	o.limitIndex = len(l.orders)
+	l.orders = append(l.orders, o)
 	l.totalVolume += o.size
 }
 
 func (l *Limit) deleteOrder(o *Order) {
-
+	l.orders[o.limitIndex] = l.orders[len(l.orders)-1]
+	l.orders = l.orders[:len(l.orders)-1]
+	if !o.isFilled() {
+		l.totalVolume -= o.size
+	}
 }
 
 type Order struct {
@@ -52,4 +56,8 @@ func NewBidOrder(size float64) *Order {
 
 func NewAskOrder(size float64) *Order {
 	return NewOrder(false, size)
+}
+
+func (o *Order) isFilled() bool {
+	return o.size == 0
 }
