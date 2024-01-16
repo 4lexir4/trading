@@ -8,17 +8,19 @@ import (
 
 func TestLimitDeleteOrder(t *testing.T) {
 	l := NewLimit(20_000)
-	n := 100
-	size := 0.5
-	for i := 0; i < n; i++ {
-		o := NewAskOrder(size)
-		l.addOrder(o)
-		assert.Equal(t, o.size, l.totalVolume)
-		assert.Equal(t, 1, len(l.orders))
-		l.deleteOrder(o)
-		assert.Equal(t, 0, len(l.orders))
-		assert.Equal(t, 0.0, l.totalVolume)
-	}
+
+	o1 := NewBidOrder(1.0)
+	o2 := NewBidOrder(2.0)
+	o3 := NewBidOrder(3.0)
+
+	l.addOrder(o1)
+	l.addOrder(o2)
+	l.addOrder(o3)
+
+	assert.Equal(t, 6.0, l.totalVolume)
+
+	l.deleteOrder(o2)
+	assert.Equal(t, 4.0, l.totalVolume)
 }
 
 func TestLimitAddOrder(t *testing.T) {
