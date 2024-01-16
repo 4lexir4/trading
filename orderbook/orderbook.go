@@ -19,6 +19,10 @@ func NewLimit(price float64) *Limit {
 
 }
 
+func (l *Limit) fillOrder(marketOrder *Order) {
+
+}
+
 func (l *Limit) addOrder(o *Order) {
 	o.limitIndex = len(l.orders)
 	l.orders = append(l.orders, o)
@@ -60,4 +64,11 @@ func NewAskOrder(size float64) *Order {
 
 func (o *Order) isFilled() bool {
 	return o.size == 0
+}
+
+func maxMinOrder(a, b *Order) (*Order, *Order) {
+	if a.size >= b.size {
+		return a, b
+	}
+	return b, a
 }
