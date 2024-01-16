@@ -17,6 +17,7 @@ func TestLimitFillOrder(t *testing.T) {
 	l.fillOrder(marketOrder)
 	assert.True(t, marketOrder.isFilled())
 	assert.Equal(t, orderSize-marketOrderSize, askOrder.size)
+	assert.Equal(t, askOrder.size, l.totalVolume)
 }
 
 func TestLimitDeleteOrder(t *testing.T) {
