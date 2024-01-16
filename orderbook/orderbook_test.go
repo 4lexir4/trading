@@ -6,6 +6,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestLimitFillOrder(t *testing.T) {
+	l := NewLimit(50_000)
+	askOrder := NewAskOrder(10)
+	l.addOrder(askOrder)
+
+	marketOrder := NewAskOrder(5)
+	l.fillOrder(marketOrder)
+	assert.True(t, marketOrder.isFilled())
+}
+
 func TestLimitDeleteOrder(t *testing.T) {
 	l := NewLimit(20_000)
 
