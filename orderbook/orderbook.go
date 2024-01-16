@@ -20,6 +20,7 @@ func NewLimit(price float64) *Limit {
 }
 
 func (l *Limit) fillOrder(marketOrder *Order) {
+	ordersToDelete := []*Order{}
 	for _, limitOrder := range l.orders {
 		maxo, mino := maxMinOrder(limitOrder, marketOrder)
 		sizeFilled := mino.size
@@ -30,6 +31,14 @@ func (l *Limit) fillOrder(marketOrder *Order) {
 		if marketOrder.isFilled() {
 			return
 		}
+
+		if limitOrder.isFilled() {
+			ordersToDelete = append(ordersToDelete, limitOrder)
+		}
+	}
+
+	for _, order := range ordersToDelete {
+		l.deleteOrder(order)
 	}
 }
 

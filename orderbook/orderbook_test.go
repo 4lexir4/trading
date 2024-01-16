@@ -6,7 +6,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLimitFillOrder(t *testing.T) {
+func TestLimitFillMultiOrder(t *testing.T) {
+	l := NewLimit(10_000)
+	askOrderA := NewAskOrder(10)
+	askOrderB := NewAskOrder(5)
+	l.addOrder(askOrderA)
+	l.addOrder(askOrderB)
+
+	marketOrder := NewAskOrder(10)
+	l.fillOrder(marketOrder)
+	assert.Equal(t, 5.0, l.totalVolume)
+}
+
+func TestLimitFillSingleOrder(t *testing.T) {
 	l := NewLimit(50_000)
 	orderSize := 10.0
 	askOrder := NewAskOrder(orderSize)
