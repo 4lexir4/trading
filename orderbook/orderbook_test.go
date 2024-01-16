@@ -16,6 +16,9 @@ func TestLimitFillMultiOrder(t *testing.T) {
 	marketOrder := NewAskOrder(10)
 	l.fillOrder(marketOrder)
 	assert.Equal(t, 5.0, l.totalVolume)
+	assert.Equal(t, 1, len(l.orders))
+	assert.Equal(t, 5.0, l.orders[0].size)
+	assert.True(t, marketOrder.isFilled())
 }
 
 func TestLimitFillSingleOrder(t *testing.T) {

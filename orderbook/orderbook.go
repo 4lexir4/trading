@@ -28,12 +28,12 @@ func (l *Limit) fillOrder(marketOrder *Order) {
 		l.totalVolume -= sizeFilled
 		mino.size = 0.0
 
-		if marketOrder.isFilled() {
-			return
-		}
-
 		if limitOrder.isFilled() {
 			ordersToDelete = append(ordersToDelete, limitOrder)
+		}
+
+		if marketOrder.isFilled() {
+			break
 		}
 	}
 
