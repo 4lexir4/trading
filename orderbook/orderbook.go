@@ -20,7 +20,15 @@ func NewLimit(price float64) *Limit {
 }
 
 func (l *Limit) fillOrder(marketOrder *Order) {
+	for _, limitOrder := range l.orders {
+		maxo, mino := maxMinOrder(limitOrder, marketOrder)
+		maxo.size -= mino.size
+		mino.size = 0.0
 
+		if marketOrder.isFilled() {
+			return
+		}
+	}
 }
 
 func (l *Limit) addOrder(o *Order) {
