@@ -8,14 +8,15 @@ import (
 
 func TestLimitFillOrder(t *testing.T) {
 	l := NewLimit(50_000)
-	askOrder := NewAskOrder(10)
+	orderSize := 10.0
+	askOrder := NewAskOrder(orderSize)
 	l.addOrder(askOrder)
 
 	marketOrderSize := 5.0
 	marketOrder := NewAskOrder(marketOrderSize)
 	l.fillOrder(marketOrder)
 	assert.True(t, marketOrder.isFilled())
-	assert.Equal(t, marketOrderSize, askOrder.size)
+	assert.Equal(t, orderSize-marketOrderSize, askOrder.size)
 }
 
 func TestLimitDeleteOrder(t *testing.T) {
