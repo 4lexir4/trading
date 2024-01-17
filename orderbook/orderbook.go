@@ -1,13 +1,34 @@
 package orderbook
 
 import (
+	"encoding/gob"
 	"math/rand"
+	"os"
 	"time"
 )
 
 type AskMap struct {
 	limits      map[float64]*Limit
 	totalVolume float64
+}
+
+func (m *AskMap) loadFromFile(src string) error {
+	f, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	var asks map[float64]float64
+
+	if err := gob.NewDecoder(f).Decode(&asks); err != nil {
+		return err
+	}
+
+	for price, size := range asks {
+		m.limits[price] = NewLimit(price)
+		m.totalVolume = size
+	}
+
+	return nil
 }
 
 func NewAskMap() *AskMap {
