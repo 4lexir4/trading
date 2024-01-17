@@ -5,6 +5,29 @@ import (
 	"time"
 )
 
+type AskMap struct {
+	limits      map[float64]*Limit
+	totalVolume float64
+}
+
+func NewAskMap() *AskMap {
+	return &AskMap{
+		limits: make(map[float64]*Limit),
+	}
+}
+
+type Orderbook struct {
+	ticker string
+	asks   *AskMap
+}
+
+func NewOrderbook(ticker string) *Orderbook {
+	return &Orderbook{
+		asks:   NewAskMap(),
+		ticker: ticker,
+	}
+}
+
 type Limit struct {
 	price       float64
 	orders      []*Order

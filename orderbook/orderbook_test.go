@@ -1,10 +1,16 @@
 package orderbook
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestNewOrderbook(t *testing.T) {
+	ob := NewOrderbook("BTCUSDT")
+	fmt.Printf("%+v\n", ob)
+}
 
 func TestLimitFillMultiOrder(t *testing.T) {
 	l := NewLimit(10_000)
