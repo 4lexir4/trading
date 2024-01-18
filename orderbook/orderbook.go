@@ -7,44 +7,57 @@ import (
 	"time"
 )
 
-type AskMap struct {
+type LimitMap struct {
 	limits      map[float64]*Limit
 	totalVolume float64
 }
 
-func (m *AskMap) loadFromFile(src string) error {
+func NewLimitMap() *LimitMap {
+	return &LimitMap{
+		limits: make(map[float64]*Limit),
+	}
+}
+
+func (m *LimitMap) loadFromFile(src string) error {
 	f, err := os.Open(src)
 	if err != nil {
 		return err
 	}
-	var asks map[float64]float64
+	var data map[float64]float64
 
-	if err := gob.NewDecoder(f).Decode(&asks); err != nil {
+	if err := gob.NewDecoder(f).Decode(&data); err != nil {
 		return err
 	}
 
-	for price, size := range asks {
-		m.limits[price] = NewLimit(price)
+	for price, size := range data {
+		l := NewLimit(price)
+		l.totalVolume = size
+		m.limits[price] = l
 		m.totalVolume = size
 	}
 
 	return nil
 }
 
-func NewAskMap() *AskMap {
-	return &AskMap{
-		limits: make(map[float64]*Limit),
-	}
-}
-
 type Orderbook struct {
 	ticker string
-	asks   *AskMap
+	asks   *LimitMap
+}
+
+func NewOrderbookFromFile(ticker, askSrc, bidSrc string) (*Orderbook, error) {
+	askMap := NewLimitMap()
+	if err := askMap.loadFromFile(askSrc); err != nil {
+		return nil, err
+	}
+
+	return &Orderbook{
+		ticker: ticker,
+	}, nil
 }
 
 func NewOrderbook(ticker string) *Orderbook {
 	return &Orderbook{
-		asks:   NewAskMap(),
+		asks:   NewLimitMap(),
 		ticker: ticker,
 	}
 }

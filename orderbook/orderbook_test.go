@@ -8,8 +8,12 @@ import (
 )
 
 func TestNewOrderbook(t *testing.T) {
-	ob := NewOrderbook("BTCUSDT")
-	fmt.Printf("%+v\n", ob)
+	ob, err := NewOrderbookFromFile("BTCUSDT", "../data/asks.gob", "")
+	assert.Nil(t, err)
+
+	for price, limit := range ob.asks.limits {
+		fmt.Printf("%+v\n", ob.asks)
+	}
 }
 
 func TestLimitFillMultiOrder(t *testing.T) {
