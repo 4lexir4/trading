@@ -35,6 +35,14 @@ func getAskByPrice(price float64) btree.CompareAgainst[*Limit] {
 	}
 }
 
+func sortByBestBid(a, b *Limit) bool {
+	return a.price > b.price
+}
+
+func sortByBestAsk(a, b *Limit) bool {
+	return a.price < b.price
+}
+
 type LimitMap struct {
 	isBids      bool
 	limits      map[float64]*Limit
