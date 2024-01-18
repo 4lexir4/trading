@@ -2,6 +2,7 @@ package orderbook
 
 import (
 	"encoding/gob"
+	"fmt"
 	"math/rand"
 	"os"
 	"time"
@@ -93,6 +94,30 @@ func NewLimits(isBids bool) *Limits {
 		isBids: isBids,
 		data:   btree.New(f),
 	}
+}
+
+func (l *Limits) Update(price float64, size float64) {
+	defer func() {
+		if size != 0.0 {
+
+			fmt.Printf("updated price [%.2f - %.2f]\n", price, size)
+		}
+	}()
+	if limit, ok := l.data.Get(getAskByPrice(price)); ok {
+		// if the incoming new size is 0 we need to remove the price
+		// level from the books
+		if size == 0.0 {
+			deleted, _ := l.data.Delete(limit)
+			fmt.Println("deleted price level:", deleted.price)
+			return
+		}
+		limit.totalVolume = size
+		return
+	}
+
+	limit := NewLimit(price)
+	limit.totalVolume = size
+	l.data.Insert(limit)
 }
 
 func (l *Limits) addOrder(price float64, o *Order) {
