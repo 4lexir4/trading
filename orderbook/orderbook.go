@@ -8,12 +8,14 @@ import (
 )
 
 type LimitMap struct {
+	isBids      bool
 	limits      map[float64]*Limit
 	totalVolume float64
 }
 
-func NewLimitMap() *LimitMap {
+func NewLimitMap(isBids bool) *LimitMap {
 	return &LimitMap{
+		isBids: isBids,
 		limits: make(map[float64]*Limit),
 	}
 }
@@ -33,7 +35,7 @@ func (m *LimitMap) loadFromFile(src string) error {
 		l := NewLimit(price)
 		l.totalVolume = size
 		m.limits[price] = l
-		m.totalVolume = size
+		m.totalVolume += size
 	}
 
 	return nil
@@ -42,24 +44,39 @@ func (m *LimitMap) loadFromFile(src string) error {
 type Orderbook struct {
 	ticker string
 	asks   *LimitMap
+	bids   *LimitMap
 }
 
 func NewOrderbookFromFile(ticker, askSrc, bidSrc string) (*Orderbook, error) {
-	askMap := NewLimitMap()
-	if err := askMap.loadFromFile(askSrc); err != nil {
+	asks := NewLimitMap(false)
+	if err := asks.loadFromFile(askSrc); err != nil {
+		return nil, err
+	}
+
+	bids := NewLimitMap(true)
+	if err := bids.loadFromFile(bidSrc); err != nil {
 		return nil, err
 	}
 
 	return &Orderbook{
 		ticker: ticker,
+		asks:   asks,
+		bids:   bids,
 	}, nil
 }
 
 func NewOrderbook(ticker string) *Orderbook {
 	return &Orderbook{
-		asks:   NewLimitMap(),
 		ticker: ticker,
 	}
+}
+
+func (ob *Orderbook) totalAskVolume() float64 {
+	return ob.asks.totalVolume
+}
+
+func (ob *Orderbook) totalBidVolume() float64 {
+	return ob.bids.totalVolume
 }
 
 type Limit struct {

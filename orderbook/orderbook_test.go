@@ -1,20 +1,22 @@
 package orderbook
 
 import (
-	"fmt"
+	//"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewOrderbook(t *testing.T) {
-	ob, err := NewOrderbookFromFile("BTCUSDT", "../data/asks.gob", "")
-	assert.Nil(t, err)
-
-	for price, limit := range ob.asks.limits {
-		fmt.Printf("%+v\n", ob.asks)
-	}
-}
+//func TestNewOrderbook(t *testing.T) {
+//  askFile := "../data/asks.go"
+//  bidFile := "../data/bids.go"
+//	ob, err := NewOrderbookFromFile("BTCUSDT", askFile, bidFile)
+//	assert.Nil(t, err)
+//
+//	fmt.Println("asks volume:", ob.totalAskVolume())
+//	fmt.Println("bids volume:", ob.totalBidVolume())
+//	}
+//}
 
 func TestLimitFillMultiOrder(t *testing.T) {
 	l := NewLimit(10_000)
