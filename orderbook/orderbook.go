@@ -5,7 +5,22 @@ import (
 	"math/rand"
 	"os"
 	"time"
+
+	"github.com/VictorLowther/btree"
 )
+
+func getBidByPrice(price float64) btree.CompareAgainst[*Limit] {
+	return func(l *Limit) int {
+		switch {
+		case l.price > price:
+			return -1
+		case l.price < price:
+			return 1
+		default:
+			return 0
+		}
+	}
+}
 
 type LimitMap struct {
 	isBids      bool
