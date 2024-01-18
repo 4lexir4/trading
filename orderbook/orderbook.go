@@ -2,7 +2,8 @@ package orderbook
 
 import (
 	"encoding/gob"
-	"fmt"
+	"sync"
+	//"fmt"
 	"math/rand"
 	"os"
 	"time"
@@ -81,6 +82,7 @@ func (l *Limits) loadFromFile(src string) error {
 
 type Limits struct {
 	isBids      bool
+	lock        sync.RWMutex
 	data        *btree.Tree[*Limit]
 	totalVolume float64
 }
@@ -96,19 +98,32 @@ func NewLimits(isBids bool) *Limits {
 	}
 }
 
+func (l *Limits) Best() *Limit {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+	if l.data.Len() == 0 {
+		return nil
+	}
+	iter := l.data.Iterator(nil, nil)
+	iter.Next()
+	return iter.Item()
+}
+
 func (l *Limits) Update(price float64, size float64) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
 	defer func() {
 		if size != 0.0 {
-
-			fmt.Printf("updated price [%.2f - %.2f]\n", price, size)
+			//fmt.Printf("updated price [%.2f - %.2f]\n", price, size)
 		}
 	}()
 	if limit, ok := l.data.Get(getAskByPrice(price)); ok {
 		// if the incoming new size is 0 we need to remove the price
 		// level from the books
 		if size == 0.0 {
-			deleted, _ := l.data.Delete(limit)
-			fmt.Println("deleted price level:", deleted.price)
+			l.data.Delete(limit)
+			//deleted, _ := l.data.Delete(limit)
+			//fmt.Println("deleted price level:", deleted.price)
 			return
 		}
 		limit.totalVolume = size
