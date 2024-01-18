@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/4lexir4/trading/orderbook"
 	"github.com/adshao/go-binance/v2"
 )
 
 func main() {
-	// asks:= orderbook.NewLimits(false)
+	asks := orderbook.NewLimits(false)
+
 	handler := func(event *binance.WsDepthEvent) {
 		fmt.Println(event.Symbol)
 		for _, ask := range event.Asks {

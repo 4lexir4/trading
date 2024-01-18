@@ -43,20 +43,20 @@ func sortByBestAsk(a, b *Limit) bool {
 	return a.price < b.price
 }
 
-type LimitMap struct {
-	isBids      bool
-	limits      map[float64]*Limit
-	totalVolume float64
-}
+//type LimitMap struct {
+//	isBids      bool
+//	limits      map[float64]*Limit
+//	totalVolume float64
+//}
 
-func NewLimitMap(isBids bool) *LimitMap {
-	return &LimitMap{
-		isBids: isBids,
-		limits: make(map[float64]*Limit),
-	}
-}
+//func NewLimitMap(isBids bool) *LimitMap {
+//	return &LimitMap{
+//		isBids: isBids,
+//		limits: make(map[float64]*Limit),
+//	}
+//}
 
-func (m *LimitMap) loadFromFile(src string) error {
+func (l *Limits) loadFromFile(src string) error {
 	f, err := os.Open(src)
 	if err != nil {
 		return err
@@ -68,43 +68,108 @@ func (m *LimitMap) loadFromFile(src string) error {
 	}
 
 	for price, size := range data {
-		l := NewLimit(price)
-		l.totalVolume = size
-		m.limits[price] = l
-		m.totalVolume += size
+		limit := NewLimit(price)
+		limit.totalVolume = size
+
+		l.data.Insert(limit)
+		l.totalVolume += size
 	}
 
 	return nil
 }
 
-type Orderbook struct {
-	ticker string
-	asks   *LimitMap
-	bids   *LimitMap
+type Limits struct {
+	isBids      bool
+	data        *btree.Tree[*Limit]
+	totalVolume float64
 }
 
-func NewOrderbookFromFile(ticker, askSrc, bidSrc string) (*Orderbook, error) {
-	asks := NewLimitMap(false)
+func NewLimits(isBids bool) *Limits {
+	f := sortByBestAsk
+	if isBids {
+		f = sortByBestBid
+	}
+	return &Limits{
+		isBids: isBids,
+		data:   btree.New(f),
+	}
+}
+
+func (l *Limits) addOrder(price float64, o *Order) {
+	if o.isBid != l.isBids {
+		panic("the side of the limits does not match the side of the order")
+	}
+
+	f := getAskByPrice(price)
+	if l.isBids {
+		f = getBidByPrice(price)
+	}
+
+	var (
+		limit *Limit
+		ok    bool
+	)
+
+	limit, ok = l.data.Get(f)
+	if !ok {
+		limit = NewLimit(price)
+		l.data.Insert(limit)
+	}
+
+	l.totalVolume += o.size
+	limit.addOrder(o)
+}
+
+type Orderbook struct {
+	pair string
+	asks *Limits
+	bids *Limits
+}
+
+func NewOrderbookFromFile(pair, askSrc, bidSrc string) (*Orderbook, error) {
+	asks := NewLimits(false)
 	if err := asks.loadFromFile(askSrc); err != nil {
 		return nil, err
 	}
 
-	bids := NewLimitMap(true)
+	bids := NewLimits(true)
 	if err := bids.loadFromFile(bidSrc); err != nil {
 		return nil, err
 	}
 
 	return &Orderbook{
-		ticker: ticker,
-		asks:   asks,
-		bids:   bids,
+		pair: pair,
+		asks: asks,
+		bids: bids,
 	}, nil
 }
 
-func NewOrderbook(ticker string) *Orderbook {
+func NewOrderbook(pair string) *Orderbook {
 	return &Orderbook{
-		ticker: ticker,
+		pair: pair,
+		bids: NewLimits(true),
+		asks: NewLimits(false),
 	}
+}
+
+func (ob *Orderbook) placeLimitOrder(price float64, o *Order) {
+	if o.isBid {
+		ob.bids.addOrder(price, o)
+	} else {
+		ob.asks.addOrder(price, o)
+	}
+}
+
+func (ob *Orderbook) bestBid() *Limit {
+	iter := ob.bids.data.Iterator(nil, nil)
+	iter.Next()
+	return iter.Item()
+}
+
+func (ob *Orderbook) bestAsk() *Limit {
+	iter := ob.asks.data.Iterator(nil, nil)
+	iter.Next()
+	return iter.Item()
 }
 
 func (ob *Orderbook) totalAskVolume() float64 {
