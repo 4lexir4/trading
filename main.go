@@ -20,6 +20,25 @@ type CoinbaseMessage struct {
 	ProductIds []string `json:"product_ids"`
 }
 
+{
+  "type": "subscribe",
+  "product_ids": [
+    "ETH-USD",
+    "ETH-EUR"
+  ],
+  "channels": [
+    "level2",
+    "heartbeat",
+    {
+      "name": "ticker",
+      "product_ids": [
+        "ETH-USD",
+        "ETH-EUR"
+      ]
+    }
+  ]
+}
+
 func main() {
 	asks := orderbook.NewLimits(false)
 	bids := orderbook.NewLimits(true)
