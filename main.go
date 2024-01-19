@@ -11,15 +11,20 @@ import (
 
 func main() {
 	asks := orderbook.NewLimits(false)
+	bids := orderbook.NewLimits(true)
 
 	handler := func(event *binance.WsDepthEvent) {
-		//fmt.Println(event.Symbol)
 		for _, ask := range event.Asks {
 			price, _ := strconv.ParseFloat(ask.Price, 64)
 			size, _ := strconv.ParseFloat(ask.Quantity, 64)
 			asks.Update(price, size)
 		}
-		fmt.Println("best ask:", asks.Best())
+		for _, bid := range event.Bids {
+			price, _ := strconv.ParseFloat(bid.Price, 64)
+			size, _ := strconv.ParseFloat(bid.Quantity, 64)
+			bids.Update(price, size)
+		}
+		fmt.Printf("ask [%.1f] [%.1f] bid\n", asks.Best().Price, bids.Best().Price)
 	}
 	errHandler := func(err error) {
 		fmt.Println(err)

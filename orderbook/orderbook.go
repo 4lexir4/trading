@@ -14,9 +14,9 @@ import (
 func getBidByPrice(price float64) btree.CompareAgainst[*Limit] {
 	return func(l *Limit) int {
 		switch {
-		case l.price > price:
+		case l.Price > price:
 			return -1
-		case l.price < price:
+		case l.Price < price:
 			return 1
 		default:
 			return 0
@@ -27,9 +27,9 @@ func getBidByPrice(price float64) btree.CompareAgainst[*Limit] {
 func getAskByPrice(price float64) btree.CompareAgainst[*Limit] {
 	return func(l *Limit) int {
 		switch {
-		case l.price < price:
+		case l.Price < price:
 			return -1
-		case l.price > price:
+		case l.Price > price:
 			return 1
 		default:
 			return 0
@@ -38,11 +38,11 @@ func getAskByPrice(price float64) btree.CompareAgainst[*Limit] {
 }
 
 func sortByBestBid(a, b *Limit) bool {
-	return a.price > b.price
+	return a.Price > b.Price
 }
 
 func sortByBestAsk(a, b *Limit) bool {
-	return a.price < b.price
+	return a.Price < b.Price
 }
 
 //type LimitMap struct {
@@ -117,7 +117,13 @@ func (l *Limits) Update(price float64, size float64) {
 			//fmt.Printf("updated price [%.2f - %.2f]\n", price, size)
 		}
 	}()
-	if limit, ok := l.data.Get(getAskByPrice(price)); ok {
+
+	getFunc := getAskByPrice(price)
+	if l.isBids {
+		getFunc = getBidByPrice(price)
+	}
+
+	if limit, ok := l.data.Get(getFunc); ok {
 		// if the incoming new size is 0 we need to remove the price
 		// level from the books
 		if size == 0.0 {
@@ -225,14 +231,14 @@ func (ob *Orderbook) totalBidVolume() float64 {
 }
 
 type Limit struct {
-	price       float64
+	Price       float64
 	orders      []*Order
 	totalVolume float64
 }
 
 func NewLimit(price float64) *Limit {
 	return &Limit{
-		price:  price,
+		Price:  price,
 		orders: []*Order{},
 	}
 
