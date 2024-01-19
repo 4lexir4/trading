@@ -1,4 +1,4 @@
-# Infrastructure for testing trading algorithms against
+# Infrastructure for testing trading algorithms
 
 ## Dependencies (for building):
 
