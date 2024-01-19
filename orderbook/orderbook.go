@@ -130,6 +130,10 @@ func (l *Limits) Update(price float64, size float64) {
 		return
 	}
 
+	if size == 0.0 {
+		return
+	}
+
 	limit := NewLimit(price)
 	limit.totalVolume = size
 	l.data.Insert(limit)
