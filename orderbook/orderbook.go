@@ -3,6 +3,7 @@ package orderbook
 import (
 	"encoding/gob"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -17,8 +18,7 @@ type Orderbooks map[string]*Book
 
 type BinanceOrderbooks struct {
 	Orderbooks Orderbooks
-
-	symbols []string
+	symbols    []string
 }
 
 func NewBinanceOrderbooks(symbols ...string) *BinanceOrderbooks {
@@ -44,17 +44,16 @@ func (b *BinanceOrderbooks) Start() error {
 			size, _ := strconv.ParseFloat(bid.Quantity, 64)
 			b.Orderbooks[event.Symbol].Bids.Update(price, size)
 		}
-		fmt.Printf("ask [%.1f] [%.1f] bid\n", asks.Best().Price, bids.Best().Price)
 	}
 	errHandler := func(err error) {
 		fmt.Println(err)
 	}
-	_, _, err := binance.WsDepthServe100Ms("btcusdt", handler, errHandler)
-	if err != nil {
-		log.Fatal(err)
-	}
+	_, _, err := binance.WsDepthServe(b.symbols, handler, errHandler)
+	return err
+}
 
-	select {}
+type Book struct {
+	Symbol string
 }
 
 func getBidByPrice(price float64) btree.CompareAgainst[*Limit] {
