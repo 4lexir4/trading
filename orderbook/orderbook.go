@@ -2,14 +2,60 @@ package orderbook
 
 import (
 	"encoding/gob"
-	"sync"
-	//"fmt"
+	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
+	"sync"
 	"time"
 
 	"github.com/VictorLowther/btree"
+	"github.com/adshao/go-binance/v2"
 )
+
+type Orderbooks map[string]*Book
+
+type BinanceOrderbooks struct {
+	Orderbooks Orderbooks
+
+	symbols []string
+}
+
+func NewBinanceOrderbooks(symbols ...string) *BinanceOrderbooks {
+	books := Orderbooks{}
+	for _, symbol := range symbols {
+		books[symbol] = NewBook(symbol)
+	}
+	return &BinanceOrderbooks{
+		Orderbooks: books,
+		symbols:    symbols,
+	}
+}
+
+func (b *BinanceOrderbooks) Start() error {
+	handler := func(event *binance.WsDepthEvent) {
+		for _, ask := range event.Asks {
+			price, _ := strconv.ParseFloat(ask.Price, 64)
+			size, _ := strconv.ParseFloat(ask.Quantity, 64)
+			b.Orderbooks[event.Symbol].Asks.Update(price, size)
+		}
+		for _, bid := range event.Bids {
+			price, _ := strconv.ParseFloat(bid.Price, 64)
+			size, _ := strconv.ParseFloat(bid.Quantity, 64)
+			b.Orderbooks[event.Symbol].Bids.Update(price, size)
+		}
+		fmt.Printf("ask [%.1f] [%.1f] bid\n", asks.Best().Price, bids.Best().Price)
+	}
+	errHandler := func(err error) {
+		fmt.Println(err)
+	}
+	_, _, err := binance.WsDepthServe100Ms("btcusdt", handler, errHandler)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	select {}
+}
 
 func getBidByPrice(price float64) btree.CompareAgainst[*Limit] {
 	return func(l *Limit) int {
