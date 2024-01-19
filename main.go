@@ -1,10 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"time"
+	//"fmt"
+	"log"
+	//"time"
 
-	"github.com/4lexir4/trading/orderbook"
+	//"github.com/4lexir4/trading/orderbook"
+	"github.com/gorilla/websocket"
 )
 
 var symbols = []string{
@@ -13,39 +15,55 @@ var symbols = []string{
 	"ATOMUSDT",
 }
 
+type ChannelInfo struct {
+	Name       string   `json:"name"`
+	ProductIds []string `json:"prodcuct_ids"`
+}
+
 type CoinbaseMessage struct {
-	Type       string   `json:"type"`
-	ProductIds []string `json:"product_ids"`
+	Type       string        `json:"type"`
+	ProductIds []string      `json:"product_ids"`
+	Channels   []ChannelInfo `json:"channels"`
 }
 
 func main() {
-	//c, _, err := websocket.DefaultDialer.Dial("wss://ws-feed.exchange.coingase.com", nil)
-	//if err != nil {
-	//	log.Fatal("dial:", err)
-	//}
-	//defer c.Close()
+	c, _, err := websocket.DefaultDialer.Dial("wss://ws-feed.exchange.coingase.com", nil)
+	if err != nil {
+		log.Fatal("dial:", err)
+	}
+	defer c.Close()
 
-	//for {
-	//	c.WriteJSON()
-	//	_, message, err := c.ReadMeassage()
-	//	if err != nil {
-	//		log.Println("read:", err)
-	//		return
-	//	}
-	//	log.Printf("recv: %s", message)
-	//}
-
-	b := orderbook.NewBinanceOrderbooks(symbols...)
-	b.Start()
-
-	go func() {
-		for {
-			time.Sleep(1 * time.Second)
-			for _, book := range b.Orderbooks {
-				fmt.Println(book.Asks.Best())
-			}
+	productIds := []string{"ETF-USD"}
+	c.WriteJSON(CoinbaseMessage{
+		Type:       "subscribe",
+		ProductIds: productIds,
+		Channels: []ChannelInfo{
+			{
+				Name:       "ticker",
+				ProductIds: productIds,
+			},
+		},
+	})
+	for {
+		_, message, err := c.ReadMeassage()
+		if err != nil {
+			log.Println("read:", err)
+			return
 		}
-	}()
+		log.Printf("recv: %s", message)
+	}
+
+	//b := orderbook.NewBinanceOrderbooks(symbols...)
+	//b.Start()
+
+	//go func() {
+	//	for {
+	//		time.Sleep(1 * time.Second)
+	//		for _, book := range b.Orderbooks {
+	//			fmt.Println(book.Asks.Best())
+	//		}
+	//	}
+	//}()
 
 	select {}
 }
