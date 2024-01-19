@@ -15,6 +15,11 @@ var symbols = []string{
 	"ATOMUSDT",
 }
 
+type CoinbaseMessage struct {
+	Type       string   `json:"type"`
+	ProductIds []string `json:"product_ids"`
+}
+
 func main() {
 	asks := orderbook.NewLimits(false)
 	bids := orderbook.NewLimits(true)
