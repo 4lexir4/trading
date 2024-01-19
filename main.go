@@ -9,6 +9,12 @@ import (
 	"github.com/adshao/go-binance/v2"
 )
 
+var symbols = []string{
+	"BTCUSDT",
+	"ETHUSDT",
+	"ATOMUSDT",
+}
+
 func main() {
 	asks := orderbook.NewLimits(false)
 	bids := orderbook.NewLimits(true)
