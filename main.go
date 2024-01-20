@@ -1,10 +1,10 @@
 package main
 
 import (
-	"log"
+	"fmt"
 
+	"github.com/4lexir4/trading/orderbook"
 	"github.com/4lexir4/trading/providers"
-	"github.com/gorilla/websocket"
 )
 
 var symbols = []string{
@@ -14,8 +14,22 @@ var symbols = []string{
 }
 
 func main() {
-	cb := providers.NewCoinbaseProvider("BTC-USD")
-	cb.Start()
+	datach := make(chan orderbook.DataFeed, 1014)
+
+	kraken := providers.NewKrakenProvider(datach, "XBT/USD")
+	kraken.Start()
+
+	for data := range datach {
+		fmt.Println(data)
+	}
+
+	return
+
+	coinbase := providers.NewCoinbaseProvider(datach, "BTC-USD", "ETH-USD", "DOGE-USD", "ADA-USD")
+	coinbase.Start()
+
+	binance := providers.NewBinanceOrderbooks(datach, "BTCUSDT", "ETHUSDT", "DOGEUSDT", "ADAUSDT")
+	binance.Start()
 
 	//b := orderbook.NewBinanceOrderbooks(symbols...)
 	//b.Start()

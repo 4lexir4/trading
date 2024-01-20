@@ -3,7 +3,6 @@ package orderbook
 import (
 	"encoding/gob"
 	"fmt"
-	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -15,6 +14,18 @@ import (
 )
 
 type Orderbooks map[string]*Book
+
+type Provider interface {
+	Start() error
+}
+
+type DataFeed struct {
+	Provider string
+	Symbol   string
+	BestAsk  float64
+	BestBid  float64
+	Spread   float64
+}
 
 type BinanceOrderbooks struct {
 	Orderbooks Orderbooks
@@ -54,6 +65,33 @@ func (b *BinanceOrderbooks) Start() error {
 
 type Book struct {
 	Symbol string
+	Asks   *Limits
+	Bids   *Limits
+}
+
+func NewBook(symbol string) *Book {
+	return &Book{
+		Symbol: symbol,
+		Asks:   NewLimits(false),
+		Bids:   NewLimits(true),
+	}
+}
+
+func (b *Book) Spread() float64 {
+	if b.Asks.data.Len() == 0 || b.Bids.data.Len() == 0 {
+		return 0.0
+	}
+	bestAsk := b.Asks.Best().Price
+	bestBid := b.Bids.Best().Price
+	return bestAsk - bestBid
+}
+
+func (b *Book) BestAsk() *Limit {
+	return b.Asks.Best()
+}
+
+func (b *Book) BestBid() *Limit {
+	return b.Bids.Best()
 }
 
 func getBidByPrice(price float64) btree.CompareAgainst[*Limit] {
@@ -157,11 +195,6 @@ func (l *Limits) Best() *Limit {
 func (l *Limits) Update(price float64, size float64) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	defer func() {
-		if size != 0.0 {
-			//fmt.Printf("updated price [%.2f - %.2f]\n", price, size)
-		}
-	}()
 
 	getFunc := getAskByPrice(price)
 	if l.isBids {
@@ -173,8 +206,6 @@ func (l *Limits) Update(price float64, size float64) {
 		// level from the books
 		if size == 0.0 {
 			l.data.Delete(limit)
-			//deleted, _ := l.data.Delete(limit)
-			//fmt.Println("deleted price level:", deleted.price)
 			return
 		}
 		limit.totalVolume = size

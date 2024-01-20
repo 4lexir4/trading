@@ -1,7 +1,8 @@
 package providers
 
 import (
-	"log"
+	"encoding/json"
+	"fmt"
 
 	"github.com/4lexir4/trading/orderbook"
 	"github.com/gorilla/websocket"
@@ -23,12 +24,19 @@ func NewCoinbaseProvider(symbols ...string) *CoinbaseProvider {
 	}
 }
 
+func (c *CoinbaseProvider) handleUpdate() error {
+	return nil
+}
+
+func (c *CoinbaseProvider) handleSnapshot() error {
+	return nil
+}
+
 func (c *CoinbaseProvider) Start() error {
 	ws, _, err := websocket.DefaultDialer.Dial("wss://ws-feed.exchange.coingase.com", nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		return err
 	}
-	defer ws.Close()
 
 	ws.WriteJSON(CoinbaseMessage{
 		Type:       "subscribe",
@@ -40,9 +48,18 @@ func (c *CoinbaseProvider) Start() error {
 		for {
 			_, message, err := ws.ReadMeassage()
 			if err != nil {
+				fmt.Println(err)
 				break
 			}
-			log.Printf("recv: %s", message)
+			msg := CoinbaseMessageResponse{}
+			if err := json.Unmarshal(message, &msg); err != nil {
+				fmt.Println(err)
+				break
+			}
+			if msg.Type == "l2update" {
+				continue
+			}
+			fmt.Println(msg)
 		}
 	}()
 
@@ -58,4 +75,9 @@ type CoinbaseMessage struct {
 	Type       string   `json:"type"`
 	ProductIds []string `json:"product_ids"`
 	Channels   []string `json:"channels"`
+}
+
+type CoinbaseMessageResponse struct {
+	Type      string `json:"type"`
+	ProductID string `json:"product_id"`
 }
