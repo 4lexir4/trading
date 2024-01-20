@@ -15,33 +15,18 @@ var symbols = []string{
 
 func main() {
 	datach := make(chan orderbook.DataFeed, 1014)
+	pvrs := []orderbook.Provider{
+		providers.NewKrakenProvider(datach, "XBT/USD"),
+		providers.NewCoinbaseProvider(datach, "BTC-USD"),
+		providers.NewBinanceOrderbooks(datach, "BTCUSDT"),
+	}
 
-	kraken := providers.NewKrakenProvider(datach, "XBT/USD")
-	kraken.Start()
+	kraken :=
+		kraken.Start()
 
 	for data := range datach {
 		fmt.Println(data)
 	}
-
-	return
-
-	coinbase := providers.NewCoinbaseProvider(datach, "BTC-USD", "ETH-USD", "DOGE-USD", "ADA-USD")
-	coinbase.Start()
-
-	binance := providers.NewBinanceOrderbooks(datach, "BTCUSDT", "ETHUSDT", "DOGEUSDT", "ADAUSDT")
-	binance.Start()
-
-	//b := orderbook.NewBinanceOrderbooks(symbols...)
-	//b.Start()
-
-	//go func() {
-	//	for {
-	//		time.Sleep(1 * time.Second)
-	//		for _, book := range b.Orderbooks {
-	//			fmt.Println(book.Asks.Best())
-	//		}
-	//	}
-	//}()
 
 	select {}
 }

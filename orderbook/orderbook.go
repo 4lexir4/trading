@@ -5,19 +5,11 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"strconv"
 	"sync"
 	"time"
 
 	"github.com/VictorLowther/btree"
-	"github.com/adshao/go-binance/v2"
 )
-
-type Orderbooks map[string]*Book
-
-type Provider interface {
-	Start() error
-}
 
 type DataFeed struct {
 	Provider string
@@ -25,6 +17,27 @@ type DataFeed struct {
 	BestAsk  float64
 	BestBid  float64
 	Spread   float64
+}
+
+type Provider interface {
+	Start() error
+	GetOrderbooks() Orderbooks
+}
+
+type Orderbooks map[string]*Book
+
+type Book struct {
+	Symbol string
+	Asks   *Limits
+	Bids   *Limits
+}
+
+func NewBook(symbol string) *Book {
+	return &Book{
+		Symbol: symbol,
+		Asks:   NewLimits(false),
+		Bids:   NewLimits(true),
+	}
 }
 
 type BinanceOrderbooks struct {
@@ -40,40 +53,6 @@ func NewBinanceOrderbooks(symbols ...string) *BinanceOrderbooks {
 	return &BinanceOrderbooks{
 		Orderbooks: books,
 		symbols:    symbols,
-	}
-}
-
-func (b *BinanceOrderbooks) Start() error {
-	handler := func(event *binance.WsDepthEvent) {
-		for _, ask := range event.Asks {
-			price, _ := strconv.ParseFloat(ask.Price, 64)
-			size, _ := strconv.ParseFloat(ask.Quantity, 64)
-			b.Orderbooks[event.Symbol].Asks.Update(price, size)
-		}
-		for _, bid := range event.Bids {
-			price, _ := strconv.ParseFloat(bid.Price, 64)
-			size, _ := strconv.ParseFloat(bid.Quantity, 64)
-			b.Orderbooks[event.Symbol].Bids.Update(price, size)
-		}
-	}
-	errHandler := func(err error) {
-		fmt.Println(err)
-	}
-	_, _, err := binance.WsDepthServe(b.symbols, handler, errHandler)
-	return err
-}
-
-type Book struct {
-	Symbol string
-	Asks   *Limits
-	Bids   *Limits
-}
-
-func NewBook(symbol string) *Book {
-	return &Book{
-		Symbol: symbol,
-		Asks:   NewLimits(false),
-		Bids:   NewLimits(true),
 	}
 }
 
