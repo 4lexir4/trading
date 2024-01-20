@@ -2,7 +2,6 @@ package orderbook
 
 import (
 	"encoding/gob"
-	"fmt"
 	"math/rand"
 	"os"
 	"sync"
@@ -21,7 +20,6 @@ type DataFeed struct {
 
 type Provider interface {
 	Start() error
-	GetOrderbooks() Orderbooks
 }
 
 type Orderbooks map[string]*Book
@@ -40,22 +38,6 @@ func NewBook(symbol string) *Book {
 	}
 }
 
-type BinanceOrderbooks struct {
-	Orderbooks Orderbooks
-	symbols    []string
-}
-
-func NewBinanceOrderbooks(symbols ...string) *BinanceOrderbooks {
-	books := Orderbooks{}
-	for _, symbol := range symbols {
-		books[symbol] = NewBook(symbol)
-	}
-	return &BinanceOrderbooks{
-		Orderbooks: books,
-		symbols:    symbols,
-	}
-}
-
 func (b *Book) Spread() float64 {
 	if b.Asks.data.Len() == 0 || b.Bids.data.Len() == 0 {
 		return 0.0
@@ -65,12 +47,12 @@ func (b *Book) Spread() float64 {
 	return bestAsk - bestBid
 }
 
-func (b *Book) BestAsk() *Limit {
-	return b.Asks.Best()
-}
-
 func (b *Book) BestBid() *Limit {
 	return b.Bids.Best()
+}
+
+func (b *Book) BestAsk() *Limit {
+	return b.Asks.Best()
 }
 
 func getBidByPrice(price float64) btree.CompareAgainst[*Limit] {
@@ -105,41 +87,6 @@ func sortByBestBid(a, b *Limit) bool {
 
 func sortByBestAsk(a, b *Limit) bool {
 	return a.Price < b.Price
-}
-
-//type LimitMap struct {
-//	isBids      bool
-//	limits      map[float64]*Limit
-//	totalVolume float64
-//}
-
-//func NewLimitMap(isBids bool) *LimitMap {
-//	return &LimitMap{
-//		isBids: isBids,
-//		limits: make(map[float64]*Limit),
-//	}
-//}
-
-func (l *Limits) loadFromFile(src string) error {
-	f, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	var data map[float64]float64
-
-	if err := gob.NewDecoder(f).Decode(&data); err != nil {
-		return err
-	}
-
-	for price, size := range data {
-		limit := NewLimit(price)
-		limit.totalVolume = size
-
-		l.data.Insert(limit)
-		l.totalVolume += size
-	}
-
-	return nil
 }
 
 type Limits struct {
@@ -223,6 +170,28 @@ func (l *Limits) addOrder(price float64, o *Order) {
 
 	l.totalVolume += o.size
 	limit.addOrder(o)
+}
+
+func (l *Limits) loadFromFile(src string) error {
+	f, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	var data map[float64]float64
+
+	if err := gob.NewDecoder(f).Decode(&data); err != nil {
+		return err
+	}
+
+	for price, size := range data {
+		limit := NewLimit(price)
+		limit.totalVolume = size
+
+		l.data.Insert(limit)
+		l.totalVolume += size
+	}
+
+	return nil
 }
 
 type Orderbook struct {

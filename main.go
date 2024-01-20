@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/4lexir4/trading/orderbook"
 	"github.com/4lexir4/trading/providers"
@@ -21,8 +22,11 @@ func main() {
 		providers.NewBinanceOrderbooks(datach, "BTCUSDT"),
 	}
 
-	kraken :=
-		kraken.Start()
+	for _, provider := range pvrs {
+		if err := provider.Start(); err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	for data := range datach {
 		fmt.Println(data)
