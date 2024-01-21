@@ -1,6 +1,10 @@
 package providers
 
-import "github.com/4lexir4/trading/orderbook"
+import (
+	"time"
+
+	"github.com/4lexir4/trading/orderbook"
+)
 
 type BinanceProvider struct {
 	Orderbooks orderbook.Orderbooks
@@ -17,5 +21,15 @@ func NewBinanceOrderbooks(feedch chan orderbook.DataFeed, symbols []string) *Bin
 		Orderbooks: books,
 		symbols:    symbols,
 		feedch:     feedch,
+	}
+}
+
+func (b *BinanceProvider) feedLoop() {
+	time.Sleep(time.Second * 2)
+	ticker := time.NewTicker(100 * time.Millisecond)
+	for {
+		for _, book := range b.Orderbooks {
+
+		}
 	}
 }
