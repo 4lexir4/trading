@@ -15,6 +15,19 @@ var symbols = []string{
 	"DOGEUSD",
 }
 
+var pairs = map[string]map[string]string{
+	"BTCUSD": {
+		"Binance":  "BTCUSDT",
+		"Kraken":   "XBT/USD",
+		"Coinbase": "BTC-USD",
+	},
+	"ETHUSD": {
+		"Binance":  "ETHUSDT",
+		"Kraken":   "ETH/USD",
+		"Coinbase": "ETH-USD",
+	},
+}
+
 func main() {
 	datach := make(chan orderbook.DataFeed, 1014)
 	pvrs := []orderbook.Provider{
