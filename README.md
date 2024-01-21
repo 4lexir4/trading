@@ -6,3 +6,4 @@
 ```$ go  get github.com/VictorLowther/btree```
 ```$ go  get github.com/adshao/go-binance```
 ```$ go  get github.com/gorilla/websocket```
+```$ go  get github.com/aopoltorzhicky/go_kraken```

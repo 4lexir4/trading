@@ -35,6 +35,7 @@ func (c *CoinbaseProvider) handleUpdate(symbol string, changes []SnapshotChange)
 			c.Orderbooks[symbol].Bids.Update(price, size)
 		}
 	}
+	return nil
 }
 
 func (c *CoinbaseProvider) handleSnapshot() error {
