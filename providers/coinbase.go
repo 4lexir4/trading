@@ -11,6 +11,7 @@ import (
 type CoinbaseProvider struct {
 	Orderbooks orderbook.Orderbooks
 	symbols    []string
+	feedch     chan orderbook.DataFeed
 }
 
 func NewCoinbaseProvider(symbols ...string) *CoinbaseProvider {
