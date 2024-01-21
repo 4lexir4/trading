@@ -33,5 +33,50 @@ func (p *KrakenProvider) Start() error {
 	if err := kraken.Connect(); err != nil {
 		return err
 	}
-	return nil
+  if err := kraken.SubscribeBook(p.symbols, 1000); err != nil {
+    return err
+  }
+
+  for func() {
+    for {
+      update := <-kraken.Listen()
+      switch data := update.Data.(type) {
+      case ws.OrderBookUpdate:
+        book := p.Orderbooks[update.Pair]
+        for _, ask := range data.Asks {
+          if !ask.Republish {
+            price, _ := ask.Price.Float64()
+            size, _ := ask.Volume.Float64()
+            book.Asks.Update(price, size)
+          }
+        }
+        for _, bid := range data.Bids {
+          if !bid.Republish {
+            price, _ := bid.Price.Float64()
+            size, _ := bid.Volume.Float64()
+            book.Bids.Update(price, size)
+          }
+        }
+
+        spread := book.Spread()
+        bestAsk := book.BestAsk()
+        bestBid := book.BestBid()
+        if bestAsk == nil || bestBid == nil {
+          continue
+        }
+        
+        p.feedch <- orderbook.DataFeed{
+          Provider: "Kraken",
+          Symbol: book.Symbol,
+          BestAsk: bestAsk.Price,
+          BestBid: bestBid.Price,
+          Spread: spread,
+        }
+      }
+    }
+  }()
+
+  return nil
 }
+
+

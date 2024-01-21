@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"hash/maphash"
 	"log"
 
 	"github.com/4lexir4/trading/orderbook"
@@ -12,11 +11,15 @@ import (
 var symbols = []string{
 	"BTCUSDT",
 	"ETHUSDT",
-	"ATOMUSDT",
-	"DOGEUSD",
+	"ADAUSD",
 }
 
 var pairs = map[string]map[string]string{
+	"ADAUSD": {
+		"Binance":  "ADAUSDT",
+		"Kraken":   "ADA/USD",
+		"Coinbase": "ADA-USD",
+	},
 	"BTCUSD": {
 		"Binance":  "BTCUSDT",
 		"Kraken":   "XBT/USD",
