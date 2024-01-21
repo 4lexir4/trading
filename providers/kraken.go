@@ -1,6 +1,10 @@
 package providers
 
-import "github.com/4lexir4/trading/orderbook"
+import (
+	"github.com/4lexir4/trading/orderbook"
+
+	ws "github.com/aopoltorzhicky/go_kraken/websocket"
+)
 
 type KrakenProvider struct {
 	Orderbooks orderbook.Orderbooks
@@ -22,4 +26,12 @@ func NewKrakenProvider(feedch chan orderbook.DataFeed, symbols []string) *Kraken
 
 func (p *KrakenProvider) GetOrderbooks() orderbook.Orderbooks {
 	return p.Orderbooks
+}
+
+func (p *KrakenProvider) Start() error {
+	kraken := ws.NewKraken(ws.ProdBaseURL)
+	if err := kraken.Connect(); err != nil {
+		return err
+	}
+	return nil
 }
