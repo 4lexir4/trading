@@ -14,7 +14,7 @@ type CoinbaseProvider struct {
 	feedch     chan orderbook.DataFeed
 }
 
-func NewCoinbaseProvider(symbols ...string) *CoinbaseProvider {
+func NewCoinbaseProvider(feedch chan orderbook.DataFeed, symbols []string) *CoinbaseProvider {
 	books := orderbook.Orderbooks{}
 	for _, symbol := range symbols {
 		books[symbol] = orderbook.NewBook(symbol)
@@ -22,6 +22,7 @@ func NewCoinbaseProvider(symbols ...string) *CoinbaseProvider {
 	return &CoinbaseProvider{
 		Orderbooks: books,
 		symbols:    symbols,
+		feedch:     feedch,
 	}
 }
 
