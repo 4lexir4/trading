@@ -26,8 +26,13 @@ func NewCoinbaseProvider(feedch chan orderbook.DataFeed, symbols []string) *Coin
 	}
 }
 
-func (c *CoinbaseProvider) handleUpdate() error {
-	return nil
+func (c *CoinbaseProvider) handleUpdate(symbol string, changes []SnapshotChange) error {
+	for _, cnage := range changes {
+		side, price, size := parseSnapShotChange(change)
+		if side == "sell" {
+
+		}
+	}
 }
 
 func (c *CoinbaseProvider) handleSnapshot() error {
