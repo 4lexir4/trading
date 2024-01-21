@@ -28,6 +28,14 @@ var pairs = map[string]map[string]string{
 	},
 }
 
+func mapSymbolsFor(provider string, s string) []string {
+	out := make([]string, len(symbols))
+	for i, symbol := range symbols {
+		out[i] = pairs[symbol][provider]
+	}
+	return out
+}
+
 func main() {
 	datach := make(chan orderbook.DataFeed, 1014)
 	pvrs := []orderbook.Provider{
