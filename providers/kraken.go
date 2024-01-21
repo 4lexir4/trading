@@ -19,3 +19,7 @@ func NewKrakenProvider(feedch chan orderbook.DataFeed, symbols []string) *Kraken
 		feedch:     feedch,
 	}
 }
+
+func (p *KrakenProvider) GetOrderbooks() orderbook.Orderbooks {
+	return p.Orderbooks
+}
