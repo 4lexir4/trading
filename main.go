@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"hash/maphash"
 	"log"
 
 	"github.com/4lexir4/trading/orderbook"
@@ -28,7 +29,7 @@ var pairs = map[string]map[string]string{
 	},
 }
 
-func mapSymbolsFor(provider string, s string) []string {
+func mapSymbolsFor(provider string) []string {
 	out := make([]string, len(symbols))
 	for i, symbol := range symbols {
 		out[i] = pairs[symbol][provider]
@@ -39,9 +40,9 @@ func mapSymbolsFor(provider string, s string) []string {
 func main() {
 	datach := make(chan orderbook.DataFeed, 1014)
 	pvrs := []orderbook.Provider{
-		providers.NewKrakenProvider(datach, []string{"XBT/USD", "ETH/USD"}),
-		providers.NewCoinbaseProvider(datach, []string{"BTC-USD", "ETH-USD"}),
-		providers.NewBinanceOrderbooks(datach, []string{"BTCUSDT", "ETHUSDT"}),
+		providers.NewKrakenProvider(datach, mapSymbolsFor("Krakenk")),
+		providers.NewCoinbaseProvider(datach, mapSymbolsFor("Coinbase")),
+		providers.NewBinanceOrderbooks(datach, mapSymbolsFor("Binance")),
 	}
 
 	for _, provider := range pvrs {
