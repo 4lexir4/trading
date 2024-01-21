@@ -3,6 +3,7 @@ package providers
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/4lexir4/trading/orderbook"
 	"github.com/gorilla/websocket"
@@ -27,7 +28,7 @@ func NewCoinbaseProvider(feedch chan orderbook.DataFeed, symbols []string) *Coin
 }
 
 func (c *CoinbaseProvider) handleUpdate(symbol string, changes []SnapshotChange) error {
-	for _, cnage := range changes {
+	for _, change := range changes {
 		side, price, size := parseSnapShotChange(change)
 		if side == "sell" {
 			c.Orderbooks[symbol].Asks.Update(price, size)
@@ -38,8 +39,36 @@ func (c *CoinbaseProvider) handleUpdate(symbol string, changes []SnapshotChange)
 	return nil
 }
 
-func (c *CoinbaseProvider) handleSnapshot() error {
+func (c *CoinbaseProvider) handleSnapshot(symbol string, asks []SnapshotEntry, bids []SnapshotEntry) error {
+	for _, entry := range asks {
+		price, size := parseSnapShotEntry(entry)
+		c.Orderbooks[symbol].Asks.Update(price, size)
+	}
+	for _, entry := range bids {
+		price, size := parseSnapShotEntry(entry)
+		c.Orderbooks[symbol].Bids.Update(price, size)
+	}
 	return nil
+}
+
+func (c *CoinbaseProvider) feedLoop() {
+	time.Sleep(time.Second * 2)
+	ticker := time.NewTicker(100 * time.Millisecond)
+	for {
+		for _, book := range c.Orderbooks {
+			spread := book.Spread()
+			bestAsk := book.BestAsk().Price
+			bestBid := book.BestBid().Price
+			c.feedch <- orderbook.DataFeed{
+				Provider: "Coinbase",
+				Symbol:   book.Symbol,
+				BestAsk:  bestAsk,
+				BestBid:  bestBid,
+				Spread:   spread,
+			}
+		}
+		<-ticker.C
+	}
 }
 
 func (c *CoinbaseProvider) Start() error {
