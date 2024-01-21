@@ -12,14 +12,15 @@ var symbols = []string{
 	"BTCUSDT",
 	"ETHUSDT",
 	"ATOMUSDT",
+	"DOGEUSD",
 }
 
 func main() {
 	datach := make(chan orderbook.DataFeed, 1014)
 	pvrs := []orderbook.Provider{
-		providers.NewKrakenProvider(datach, "XBT/USD", "ETH/USD"),
-		providers.NewCoinbaseProvider(datach, "BTC-USD", "ETH-USD"),
-		providers.NewBinanceOrderbooks(datach, "BTCUSDT", "ETHUSDT"),
+		providers.NewKrakenProvider(datach, []string{"XBT/USD", "ETH/USD"}),
+		providers.NewCoinbaseProvider(datach, []string{"BTC-USD", "ETH-USD"}),
+		providers.NewBinanceOrderbooks(datach, []string{"BTCUSDT", "ETHUSDT"}),
 	}
 
 	for _, provider := range pvrs {
