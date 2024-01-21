@@ -17,9 +17,9 @@ var symbols = []string{
 func main() {
 	datach := make(chan orderbook.DataFeed, 1014)
 	pvrs := []orderbook.Provider{
-		providers.NewKrakenProvider(datach, "XBT/USD"),
-		providers.NewCoinbaseProvider(datach, "BTC-USD"),
-		providers.NewBinanceOrderbooks(datach, "BTCUSDT"),
+		providers.NewKrakenProvider(datach, "XBT/USD", "ETH/USD"),
+		providers.NewCoinbaseProvider(datach, "BTC-USD", "ETH-USD"),
+		providers.NewBinanceOrderbooks(datach, "BTCUSDT", "ETHUSDT"),
 	}
 
 	for _, provider := range pvrs {
