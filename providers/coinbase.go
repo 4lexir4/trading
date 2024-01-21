@@ -30,7 +30,9 @@ func (c *CoinbaseProvider) handleUpdate(symbol string, changes []SnapshotChange)
 	for _, cnage := range changes {
 		side, price, size := parseSnapShotChange(change)
 		if side == "sell" {
-
+			c.Orderbooks[symbol].Asks.Update(price, size)
+		} else {
+			c.Orderbooks[symbol].Bids.Update(price, size)
 		}
 	}
 }
