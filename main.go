@@ -33,6 +33,10 @@ var pairs = map[string]map[string]string{
 	},
 }
 
+func getSymbolForProvider(p string, symbol string) string {
+	return pairs[symbol][p]
+}
+
 func mapSymbolsFor(provider string) []string {
 	out := make([]string, len(symbols))
 	for i, symbol := range symbols {
