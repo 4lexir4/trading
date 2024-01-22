@@ -3,6 +3,7 @@ package providers
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/4lexir4/trading/orderbook"
@@ -107,6 +108,14 @@ func (c *CoinbaseProvider) Start() error {
 	go c.feedLoop()
 
 	return nil
+}
+
+func parseSnapShotChange(change SnapshotChange) (string, float64, float64) {
+	// in this case its either "buy" or "sell"
+	side := change[0]
+	price, _ := strconv.ParseFloat(change[1], 64)
+	size, _ := strconv.ParseFloat(change[2], 64)
+	return side, price, size
 }
 
 type Message struct {
