@@ -55,7 +55,7 @@ func main() {
 	}
 
 	for data := range datach {
-		fmt.Println(data)
+		fmt.Printf("[%s] ASK %f %f BID [%f] \n", data.Provider, data.BestAsk, data.BestBid, data.Spread)
 	}
 
 	select {}
