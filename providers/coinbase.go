@@ -118,7 +118,7 @@ func parseSnapShotChange(change SnapshotChange) (string, float64, float64) {
 	return side, price, size
 }
 
-func parseSnapShotEntry(entry [2]string) (float64, float64) {
+func parseSnapShotEntry(entry SnapshotEntry) (float64, float64) {
 	price, _ := strconv.ParseFloat(entry[0], 64)
 	size, _ := strconv.ParseFloat(entry[1], 64)
 	return price, size
@@ -172,23 +172,6 @@ type MessageChannel struct {
 	ProductIds []string `json:"product_ids"`
 }
 
-type SnapshotChange struct {
-	Side  string
-	Price string
-	Size  string
-}
+type SnapshotChange [3]string
 
-type SnapshotEntry struct {
-	Price string
-	Size  string
-}
-
-type CoinabaseChannelInfo struct {
-	Name       string   `json:"name"`
-	ProductIds []string `json:"prodcuct_ids"`
-}
-
-type CoinbaseMessageResponse struct {
-	Type      string `json:"type"`
-	ProductID string `json:"product_id"`
-}
+type SnapshotEntry [2]string

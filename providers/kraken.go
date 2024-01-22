@@ -61,10 +61,11 @@ func (p *KrakenProvider) Start() error {
         spread := book.Spread()
         bestAsk := book.BestAsk()
         bestBid := book.BestBid()
+
         if bestAsk == nil || bestBid == nil {
           continue
         }
-        
+
         p.feedch <- orderbook.DataFeed{
           Provider: "Kraken",
           Symbol: book.Symbol,
@@ -78,5 +79,3 @@ func (p *KrakenProvider) Start() error {
 
   return nil
 }
-
-
