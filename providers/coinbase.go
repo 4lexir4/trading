@@ -124,6 +124,12 @@ func parseSnapShotEntry(entry [2]string) (float64, float64) {
 	return price, size
 }
 
+type CoinbaseMessage struct {
+	Type       string   `json:"type"`
+	ProductIds []string `json:"product_ids"`
+	Channels   []string `json:"channels"`
+}
+
 type Message struct {
 	Type       string   `json:"type"`
 	ProductID  string   `json:"product_id"`
@@ -180,12 +186,6 @@ type SnapshotEntry struct {
 type CoinabaseChannelInfo struct {
 	Name       string   `json:"name"`
 	ProductIds []string `json:"prodcuct_ids"`
-}
-
-type CoinbaseMessage struct {
-	Type       string   `json:"type"`
-	ProductIds []string `json:"product_ids"`
-	Channels   []string `json:"channels"`
 }
 
 type CoinbaseMessageResponse struct {
