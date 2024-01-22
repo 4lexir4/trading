@@ -3,6 +3,7 @@ package providers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/4lexir4/trading/orderbook"
@@ -82,7 +83,9 @@ func (c *CoinbaseProvider) Start() error {
 		for {
 			_, message, err := ws.ReadMessage()
 			if err != nil {
-				fmt.Println(err)
+				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+					log.Printf("error: %v", err)
+				}
 				break
 			}
 			msg := Message{}

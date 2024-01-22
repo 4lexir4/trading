@@ -44,8 +44,8 @@ func main() {
 	datach := make(chan orderbook.DataFeed, 1024)
 	pvrs := []orderbook.Provider{
 		//providers.NewKrakenProvider(datach, mapSymbolsFor("Kraken")),
-		//providers.NewCoinbaseProvider(datach, mapSymbolsFor("Coinbase")),
-		providers.NewBinanceOrderbooks(datach, mapSymbolsFor("Binance")),
+		providers.NewCoinbaseProvider(datach, mapSymbolsFor("Coinbase")),
+		//providers.NewBinanceOrderbooks(datach, mapSymbolsFor("Binance")),
 	}
 
 	for _, provider := range pvrs {
@@ -55,7 +55,14 @@ func main() {
 	}
 
 	for data := range datach {
-		fmt.Printf("[%s | %s] ASK %f %f BID [%f] \n", data.Provider, data.Symbol, data.BestAsk, data.BestBid, data.Spread)
+		fmt.Printf(
+			"[%s | %s] ASK %f %f BID [%f] \n",
+			data.Provider,
+			data.Symbol,
+			data.BestAsk,
+			data.BestBid,
+			data.Spread,
+		)
 	}
 
 	select {}
