@@ -3,7 +3,6 @@ package providers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/4lexir4/trading/orderbook"
@@ -76,9 +75,7 @@ func (c *CoinbaseProvider) Start() error {
 		for {
 			_, message, err := ws.ReadMessage()
 			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					log.Printf("error: %v", err)
-				}
+				fmt.Println(err)
 				break
 			}
 			msg := Message{}
@@ -106,7 +103,7 @@ func parseSnapShotChange(change SnapshotChange) (string, float64, float64) {
 	return side, price, size
 }
 
-func parseSnapShotEntry(entry SnapshotEntry) (float64, float64) {
+func parseSnapShotEntry(entry [2]string) (float64, float64) {
 	price, _ := strconv.ParseFloat(entry[0], 64)
 	size, _ := strconv.ParseFloat(entry[1], 64)
 	return price, size

@@ -10,8 +10,8 @@ import (
 )
 
 var symbols = []string{
-	"BTCUSDT",
-	"ETHUSDT",
+	"BTCUSD",
+	"ETHUSD",
 	"ADAUSD",
 }
 
