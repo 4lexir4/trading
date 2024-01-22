@@ -85,22 +85,26 @@ func (c *CoinbaseProvider) Start() error {
 
 	go func() {
 		for {
-			_, message, err := ws.ReadMeassage()
+			_, message, err := ws.ReadMessage()
 			if err != nil {
 				fmt.Println(err)
 				break
 			}
-			msg := CoinbaseMessageResponse{}
+			msg := Message{}
 			if err := json.Unmarshal(message, &msg); err != nil {
 				fmt.Println(err)
 				break
 			}
 			if msg.Type == "l2update" {
-				continue
+				c.handleUpdate(msg.ProductID, msg.Changes)
 			}
-			fmt.Println(msg)
+			if msg.Type == "snapshot" {
+				c.handleSnapshot(msg.ProductID, msg.Asks, msg.Bids)
+			}
 		}
 	}()
+
+	go c.feedLoop()
 
 	return nil
 }
