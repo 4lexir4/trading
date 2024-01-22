@@ -1,4 +1,4 @@
-package server
+package socket
 
 import (
 	"fmt"
@@ -15,6 +15,12 @@ var upgrader = websocket.Upgrader{}
 type Server struct {
 	lock  sync.RWMutex
 	conns map[*websocket.Conn]bool
+}
+
+func NewServer() *Server {
+	return &Server{
+		conns: make(map[*websocket.Conn]bool),
+	}
 }
 
 func (s *Server) Start() error {

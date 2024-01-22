@@ -3,12 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
-
-	//"time"
 
 	"github.com/4lexir4/trading/orderbook"
 	"github.com/4lexir4/trading/providers"
+	"github.com/4lexir4/trading/socket"
 	"github.com/4lexir4/trading/util"
 )
 
@@ -62,6 +60,9 @@ func main() {
 		}
 	}
 
+	socketServer := socket.NewServer()
+	socketServer.Start()
+
 	//ticker := time.NewTicker(time.Millisecond * 50)
 	//go func() {
 	//	for {
@@ -99,11 +100,11 @@ func main() {
 	//	)
 	//}
 
-	ticker := time.NewTicker(time.Microsecond * 200)
-	for {
-		calcBestSpreads(pvrs)
-		<-ticker.C
-	}
+	//ticker := time.NewTicker(time.Microsecond * 200)
+	//for {
+	//	calcBestSpreads(pvrs)
+	//	<-ticker.C
+	//}
 
 	//select {}
 }
