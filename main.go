@@ -56,25 +56,30 @@ func main() {
 	}
 
 	ticker := time.NewTicker(time.Millisecond * 100)
-	for {
-		for _, p := range pvrs {
-			for _, book := range p.GetOrderbooks() {
-				var (
-					spread  = book.Spread()
-					bestAsk = book.BestAsk().Price
-					bestBid = book.BestBid().Price
-				)
-				datach <- orderbook.DataFeed{
-					Provider: p.Name(),
-					Symbol:   book.Symbol,
-					BestAsk:  bestAsk,
-					BestBid:  bestBid,
-					Spread:   spread,
+	go func() {
+		for {
+			for _, p := range pvrs {
+				for _, book := range p.GetOrderbooks() {
+					var (
+						spread  = book.Spread()
+						bestAsk = book.BestAsk()
+						bestBid = book.BestBid()
+					)
+					if bestAsk == nil || bestBid == nil {
+						continue
+					}
+					datach <- orderbook.DataFeed{
+						Provider: p.Name(),
+						Symbol:   book.Symbol,
+						BestAsk:  bestAsk.Price,
+						BestBid:  bestBid.Price,
+						Spread:   spread,
+					}
 				}
 			}
+			<-ticker.C
 		}
-		<-ticker.C
-	}
+	}()
 
 	for data := range datach {
 		fmt.Printf(
