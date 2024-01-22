@@ -11,15 +11,15 @@ import (
 var symbols = []string{
 	"BTCUSDT",
 	"ETHUSDT",
-	//"ADAUSD",
+	"ADAUSD",
 }
 
 var pairs = map[string]map[string]string{
-	//"ADAUSD": {
-	//	"Binance":  "ADAUSDT",
-	//	"Kraken":   "ADA/USD",
-	//	"Coinbase": "ADA-USD",
-	//},
+	"ADAUSD": {
+		"Binance":  "ADAUSDT",
+		"Kraken":   "ADA/USD",
+		"Coinbase": "ADA-USD",
+	},
 	"BTCUSD": {
 		"Binance":  "BTCUSDT",
 		"Kraken":   "XBT/USD",
@@ -43,8 +43,8 @@ func mapSymbolsFor(provider string) []string {
 func main() {
 	datach := make(chan orderbook.DataFeed, 1024)
 	pvrs := []orderbook.Provider{
-		//providers.NewKrakenProvider(datach, mapSymbolsFor("Kraken")),
-		providers.NewCoinbaseProvider(datach, mapSymbolsFor("Coinbase")),
+		providers.NewKrakenProvider(datach, mapSymbolsFor("Kraken")),
+		//providers.NewCoinbaseProvider(datach, mapSymbolsFor("Coinbase")),
 		//providers.NewBinanceOrderbooks(datach, mapSymbolsFor("Binance")),
 	}
 

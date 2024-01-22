@@ -3,7 +3,7 @@ package providers
 import (
 	"fmt"
 	"strconv"
-	//"time"
+	"time"
 
 	"github.com/4lexir4/trading/orderbook"
 	"github.com/adshao/go-binance/v2"
@@ -27,28 +27,28 @@ func NewBinanceOrderbooks(feedch chan orderbook.DataFeed, symbols []string) *Bin
 	}
 }
 
-//func (b *BinanceProvider) feedLoop() {
-//	time.Sleep(time.Second * 2)
-//	ticker := time.NewTicker(100 * time.Millisecond)
-//	for {
-//		for _, book := range b.Orderbooks {
-//			spread := book.Spread()
-//			bestAsk := book.BestAsk()
-//			bestBid := book.BestBid()
-//			b.feedch <- orderbook.DataFeed{
-//				Provider: "Binance",
-//				Symbol:   book.Symbol,
-//				BestAsk:  bestAsk.Price,
-//				BestBid:  bestBid.Price,
-//				Spread:   spread,
-//			}
-//		}
-//		<-ticker.C
-//	}
-//}
+func (b *BinanceProvider) feedLoop() {
+	time.Sleep(time.Second * 2)
+	ticker := time.NewTicker(100 * time.Millisecond)
+	for {
+		for _, book := range b.Orderbooks {
+			spread := book.Spread()
+			bestAsk := book.BestAsk()
+			bestBid := book.BestBid()
+			b.feedch <- orderbook.DataFeed{
+				Provider: "Binance",
+				Symbol:   book.Symbol,
+				BestAsk:  bestAsk.Price,
+				BestBid:  bestBid.Price,
+				Spread:   spread,
+			}
+		}
+		<-ticker.C
+	}
+}
 
 func (b *BinanceProvider) Start() error {
-	//go b.feedLoop()
+	go b.feedLoop()
 
 	handler := func(event *binance.WsDepthEvent) {
 		for _, ask := range event.Asks {
@@ -62,18 +62,12 @@ func (b *BinanceProvider) Start() error {
 			b.Orderbooks[event.Symbol].Bids.Update(price, size)
 		}
 
-		//for _, book := range b.Orderbooks {
 		var (
 			book    = b.Orderbooks[event.Symbol]
 			spread  = book.Spread()
 			bestAsk = book.BestAsk()
 			bestBid = book.BestBid()
 		)
-
-		//if bestAsk == nil || bestBid == nil {
-		//  return
-		//	//continue
-		//}
 
 		b.feedch <- orderbook.DataFeed{
 			Provider: "Binance",
@@ -82,10 +76,8 @@ func (b *BinanceProvider) Start() error {
 			BestBid:  bestBid.Price,
 			Spread:   spread,
 		}
-		//}
 
 	}
-
 	errHandler := func(err error) {
 		fmt.Println(err)
 	}
