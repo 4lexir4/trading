@@ -28,6 +28,14 @@ func NewCoinbaseProvider(feedch chan orderbook.DataFeed, symbols []string) *Coin
 	}
 }
 
+func (c *CoinbaseProvider) GetOrderbooks() orderbook.Orderbooks {
+	return c.Orderbooks
+}
+
+func (c *CoinbaseProvider) Name() string {
+	return "Coinbase"
+}
+
 func (c *CoinbaseProvider) handleUpdate(symbol string, changes []SnapshotChange) error {
 	for _, change := range changes {
 		side, price, size := parseSnapShotChange(change)
