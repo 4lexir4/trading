@@ -105,5 +105,48 @@ func main() {
 		Spread  float64
 	}
 
+  func calcBestSpreads(pvrs []orederbook.orderbook.Provider) {
+    for i := 0; i < len(pvrs); i++ {
+      a := pvrs[i]
+      var b orderbook.Provider
+      if len(pvrs) -1 == i{
+        b = pvrs[0]
+      } else {
+        b = pvrs[i + 1]
+      }
+
+      for _, symbol := range symbols {
+        bookA := a.GetOrderbooks()[getSymbolForProvider(a.Name(), symbol)]
+        bookB := b.GetOrderbooks()[getSymbolForProvider(b.Name(), symbol)]
+
+        best := BestSpread{
+          Symbol: symbol,
+        }
+
+        bestBidA := bookA.BestBid()
+        bestBidB := bookB.BestBid()
+        if bestBidA == nil || bestBidB == nil {
+          continue
+        }
+
+        if bestBidA.Price < bestBidB.Price {
+          best.A = a.Name()
+          best.B = b.Name()
+          best.BestBid = bestBidA.Price
+          best.BestAsk = bookB.BestAsk().Price
+        } else {
+          best.A = b.Name()
+          best.B = a.Name()
+          best.BestBid = bestBidB.Price
+          best.BestAsk = bookA.BestAsk().Price
+        }
+
+        best.Spread = util.Round(best.BestAsk - best.BestBid, 10_000)
+
+        fmt.Println(best)
+      }
+    }
+  }
+
 	select {}
 }
