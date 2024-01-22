@@ -45,21 +45,6 @@ func (c *CoinbaseProvider) handleUpdate(symbol string, changes []SnapshotChange)
 			c.Orderbooks[symbol].Bids.Update(price, size)
 		}
 	}
-
-	var (
-		book    = c.Orderbooks[symbol]
-		spread  = book.Spread()
-		bestAsk = book.BestAsk().Price
-		bestBid = book.BestBid().Price
-	)
-	c.feedch <- orderbook.DataFeed{
-		Provider: "Coinbase",
-		Symbol:   book.Symbol,
-		BestAsk:  bestAsk,
-		BestBid:  bestBid,
-		Spread:   spread,
-	}
-
 	return nil
 }
 

@@ -49,19 +49,31 @@ func main() {
 		//providers.NewBinanceOrderbooks(datach, mapSymbolsFor("Binance")),
 	}
 
-	ticker := time.NewTicker(time.Millisecond * 100)
-	for {
-		for _, p := range pvrs {
-      go 
-
-		}
-		<-ticker.C
-	}
-
 	for _, provider := range pvrs {
 		if err := provider.Start(); err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	ticker := time.NewTicker(time.Millisecond * 100)
+	for {
+		for _, p := range pvrs {
+			for _, book := range p.GetOrderbooks() {
+				var (
+					spread  = book.Spread()
+					bestAsk = book.BestAsk().Price
+					bestBid = book.BestBid().Price
+				)
+				datach <- orderbook.DataFeed{
+					Provider: p.Name(),
+					Symbol:   book.Symbol,
+					BestAsk:  bestAsk,
+					BestBid:  bestBid,
+					Spread:   spread,
+				}
+			}
+		}
+		<-ticker.C
 	}
 
 	for data := range datach {
