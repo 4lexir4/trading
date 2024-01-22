@@ -10,7 +10,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
 
 type Server struct {
 	lock  sync.RWMutex
@@ -50,9 +52,13 @@ type X struct {
 }
 
 func (s *Server) readLoop(ws *websocket.Conn) {
+	defer ws.Close()
 	i := 0
 	for {
-		ws.WriteJSON(X{Val: i})
+		if err := ws.WriteJSON(X{Val: i}); err != nil {
+			fmt.Println("write error:", err)
+		}
+		i++
 		time.Sleep(time.Second)
 	}
 }
@@ -63,7 +69,6 @@ func (s *Server) handleBestSpreads(w http.ResponseWriter, r *http.Request) {
 		log.Panicln("websocket upgrade error:", err)
 		return
 	}
-	defer ws.Close()
 
 	s.registerConn(ws)
 
