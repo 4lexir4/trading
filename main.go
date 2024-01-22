@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"log"
+	"time"
 
 	"github.com/4lexir4/trading/orderbook"
 	"github.com/4lexir4/trading/providers"
@@ -60,65 +61,21 @@ func main() {
 		}
 	}
 
-	socketServer := socket.NewServer()
+	bestSpreadch := make(chan orderbook.BestSpread, 1024)
+
+	go func() {
+		ticker := time.NewTicker(time.Microsecond * 200)
+		for {
+			calcBestSpreads(bestSpreadch, pvrs)
+			<-ticker.C
+		}
+	}()
+
+	socketServer := socket.NewServer(bestSpreadch)
 	socketServer.Start()
-
-	//ticker := time.NewTicker(time.Millisecond * 50)
-	//go func() {
-	//	for {
-	//		for _, p := range pvrs {
-	//			for _, book := range p.GetOrderbooks() {
-	//				var (
-	//					spread  = book.Spread()
-	//					bestAsk = book.BestAsk()
-	//					bestBid = book.BestBid()
-	//				)
-	//				if bestAsk == nil || bestBid == nil {
-	//					continue
-	//				}
-	//				datach <- orderbook.DataFeed{
-	//					Provider: p.Name(),
-	//					Symbol:   book.Symbol,
-	//					BestAsk:  bestAsk.Price,
-	//					BestBid:  bestBid.Price,
-	//					Spread:   spread,
-	//				}
-	//			}
-	//		}
-	//		<-ticker.C
-	//	}
-	//}()
-
-	//for data := range datach {
-	//	fmt.Printf(
-	//		"[%s | %s] ASK %f %f BID [%f] \n",
-	//		data.Provider,
-	//		data.Symbol,
-	//		data.BestAsk,
-	//		data.BestBid,
-	//		data.Spread,
-	//	)
-	//}
-
-	//ticker := time.NewTicker(time.Microsecond * 200)
-	//for {
-	//	calcBestSpreads(pvrs)
-	//	<-ticker.C
-	//}
-
-	//select {}
 }
 
-type BestSpread struct {
-	Symbol  string
-	A       string
-	B       string
-	BestBid float64
-	BestAsk float64
-	Spread  float64
-}
-
-func calcBestSpreads(pvrs []orderbook.Provider) {
+func calcBestSpreads(datach chan orderbook.BestSpread, pvrs []orderbook.Provider) {
 	for i := 0; i < len(pvrs); i++ {
 		a := pvrs[i]
 		var b orderbook.Provider
@@ -132,7 +89,7 @@ func calcBestSpreads(pvrs []orderbook.Provider) {
 			bookA := a.GetOrderbooks()[getSymbolForProvider(a.Name(), symbol)]
 			bookB := b.GetOrderbooks()[getSymbolForProvider(b.Name(), symbol)]
 
-			best := BestSpread{
+			best := orderbook.BestSpread{
 				Symbol: symbol,
 			}
 
@@ -156,7 +113,7 @@ func calcBestSpreads(pvrs []orderbook.Provider) {
 
 			best.Spread = util.Round(best.BestAsk-best.BestBid, 10000)
 
-			fmt.Println(best)
+			datach <- best
 		}
 	}
 }

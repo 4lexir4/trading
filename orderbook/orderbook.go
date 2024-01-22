@@ -10,6 +10,15 @@ import (
 	"github.com/VictorLowther/btree"
 )
 
+type BestSpread struct {
+	Symbol  string
+	A       string
+	B       string
+	BestBid float64
+	BestAsk float64
+	Spread  float64
+}
+
 type DataFeed struct {
 	Provider string
 	Symbol   string

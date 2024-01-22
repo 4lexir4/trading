@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 	"sync"
-	"time"
 
+	"github.com/4lexir4/trading/orderbook"
 	"github.com/gorilla/websocket"
 )
 
@@ -15,18 +15,21 @@ var upgrader = websocket.Upgrader{
 }
 
 type Server struct {
+	bsch  chan orderbook.BestSpread
 	lock  sync.RWMutex
 	conns map[*websocket.Conn]bool
 }
 
-func NewServer() *Server {
+func NewServer(bsch chan orderbook.BestSpread) *Server {
 	return &Server{
+		bsch:  bsch,
 		conns: make(map[*websocket.Conn]bool),
 	}
 }
 
 func (s *Server) Start() error {
 	http.HandleFunc("/bestspreads", s.handleBestSpreads)
+	go s.writeLoop()
 	return http.ListenAndServe(":3000", nil)
 }
 
@@ -46,36 +49,22 @@ func (s *Server) registerConn(ws *websocket.Conn) {
 	s.lock.Unlock()
 
 	fmt.Printf("register connection %s\n", ws.RemoteAddr())
-
 }
 
-type X struct {
-	Val int
-}
-
-func (s *Server) readLoop(ws *websocket.Conn) {
-	defer func() {
-		s.unregisterConn(ws)
-	}()
-
-	i := 0
-	for {
-		if err := ws.WriteJSON(X{Val: i}); err != nil {
-			fmt.Println("write error:", err)
+func (s *Server) writeLoop() {
+	for data := range s.bsch {
+		for ws := range s.conns {
+			ws.WriteJSON(data)
 		}
-		i++
-		time.Sleep(time.Second)
 	}
 }
 
 func (s *Server) handleBestSpreads(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Panicln("websocket upgrade error:", err)
+		log.Println("websocket upgrade error:", err)
 		return
 	}
 
 	s.registerConn(ws)
-
-	go s.readLoop(ws)
 }
