@@ -62,23 +62,27 @@ func (b *BinanceProvider) Start() error {
 			b.Orderbooks[event.Symbol].Bids.Update(price, size)
 		}
 
-		for _, book := range b.Orderbooks {
-			spread := book.Spread()
-			bestAsk := book.BestAsk()
-			bestBid := book.BestBid()
+		//for _, book := range b.Orderbooks {
+		var (
+			book    = b.Orderbooks[event.Symbol]
+			spread  = book.Spread()
+			bestAsk = book.BestAsk()
+			bestBid = book.BestBid()
+		)
 
-			if bestAsk == nil || bestBid == nil {
-				continue
-			}
+		//if bestAsk == nil || bestBid == nil {
+		//  return
+		//	//continue
+		//}
 
-			b.feedch <- orderbook.DataFeed{
-				Provider: "Binance",
-				Symbol:   book.Symbol,
-				BestAsk:  bestAsk.Price,
-				BestBid:  bestBid.Price,
-				Spread:   spread,
-			}
+		b.feedch <- orderbook.DataFeed{
+			Provider: "Binance",
+			Symbol:   book.Symbol,
+			BestAsk:  bestAsk.Price,
+			BestBid:  bestBid.Price,
+			Spread:   spread,
 		}
+		//}
 
 	}
 
