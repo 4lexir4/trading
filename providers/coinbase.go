@@ -118,6 +118,12 @@ func parseSnapShotChange(change SnapshotChange) (string, float64, float64) {
 	return side, price, size
 }
 
+func parseSnapShotEntry(entry [2]string) (float64, float64) {
+	price, _ := strconv.ParseFloat(entry[0], 64)
+	size, _ := strconv.ParseFloat(entry[1], 64)
+	return price, size
+}
+
 type Message struct {
 	Type       string   `json:"type"`
 	ProductID  string   `json:"product_id"`
