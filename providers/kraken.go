@@ -24,6 +24,10 @@ func NewKrakenProvider(feedch chan orderbook.DataFeed, symbols []string) *Kraken
 	}
 }
 
+func (p *KrakenProvider) Name() string {
+	return "Kraken"
+}
+
 func (p *KrakenProvider) GetOrderbooks() orderbook.Orderbooks {
 	return p.Orderbooks
 }
@@ -58,22 +62,6 @@ func (p *KrakenProvider) Start() error {
 						size, _ := bid.Volume.Float64()
 						book.Bids.Update(price, size)
 					}
-				}
-
-				spread := book.Spread()
-				bestAsk := book.BestAsk()
-				bestBid := book.BestBid()
-
-				if bestAsk == nil || bestBid == nil {
-					continue
-				}
-
-				p.feedch <- orderbook.DataFeed{
-					Provider: "Kraken",
-					Symbol:   book.Symbol,
-					BestAsk:  bestAsk.Price,
-					BestBid:  bestBid.Price,
-					Spread:   spread,
 				}
 			}
 		}
