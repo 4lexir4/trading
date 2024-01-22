@@ -36,6 +36,8 @@ func (s *Server) unregisterConn(ws *websocket.Conn) {
 	s.lock.Unlock()
 
 	fmt.Printf("unregister connection %s\n", ws.RemoteAddr())
+
+	ws.Close()
 }
 
 func (s *Server) registerConn(ws *websocket.Conn) {
@@ -52,7 +54,10 @@ type X struct {
 }
 
 func (s *Server) readLoop(ws *websocket.Conn) {
-	defer ws.Close()
+	defer func() {
+		s.unregisterConn(ws)
+	}()
+
 	i := 0
 	for {
 		if err := ws.WriteJSON(X{Val: i}); err != nil {
