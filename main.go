@@ -46,7 +46,7 @@ func main() {
 	pvrs := []orderbook.Provider{
 		//providers.NewKrakenProvider(datach, mapSymbolsFor("Kraken")),
 		providers.NewCoinbaseProvider(datach, mapSymbolsFor("Coinbase")),
-		//providers.NewBinanceOrderbooks(datach, mapSymbolsFor("Binance")),
+		providers.NewBinanceOrderbooks(datach, mapSymbolsFor("Binance")),
 	}
 
 	for _, provider := range pvrs {
@@ -55,7 +55,7 @@ func main() {
 		}
 	}
 
-	ticker := time.NewTicker(time.Millisecond * 100)
+	ticker := time.NewTicker(time.Millisecond * 500)
 	go func() {
 		for {
 			for _, p := range pvrs {

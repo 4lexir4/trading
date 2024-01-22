@@ -1,8 +1,8 @@
 build:
-	@go build -o bin/trading
+	go build -o bin/trading
 
 run: build
-	@./bin/trading
+	./bin/trading
 
 test:
-	@go test -v ./...
+	go test -v ./...

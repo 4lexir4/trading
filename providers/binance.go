@@ -26,6 +26,14 @@ func NewBinanceOrderbooks(feedch chan orderbook.DataFeed, symbols []string) *Bin
 	}
 }
 
+func (b *BinanceProvider) GetOrderbooks() orderbook.Orderbooks {
+	return b.Orderbooks
+}
+
+func (b *BinanceProvider) Name() string {
+	return "Binance"
+}
+
 func (b *BinanceProvider) Start() error {
 	handler := func(event *binance.WsDepthEvent) {
 		for _, ask := range event.Asks {
@@ -38,22 +46,6 @@ func (b *BinanceProvider) Start() error {
 			size, _ := strconv.ParseFloat(bid.Quantity, 64)
 			b.Orderbooks[event.Symbol].Bids.Update(price, size)
 		}
-
-		var (
-			book    = b.Orderbooks[event.Symbol]
-			spread  = book.Spread()
-			bestAsk = book.BestAsk()
-			bestBid = book.BestBid()
-		)
-
-		b.feedch <- orderbook.DataFeed{
-			Provider: "Binance",
-			Symbol:   book.Symbol,
-			BestAsk:  bestAsk.Price,
-			BestBid:  bestBid.Price,
-			Spread:   spread,
-		}
-
 	}
 	errHandler := func(err error) {
 		fmt.Println(err)
