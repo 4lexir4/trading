@@ -68,7 +68,8 @@ func (c *CoinbaseProvider) Start() error {
 	ws.WriteJSON(CoinbaseMessage{
 		Type:       "subscribe",
 		ProductIds: c.symbols,
-		Channels:   []string{"level2"},
+		//Channels:   []string{"level2"}, // this one now requires authentication... :(
+		Channels: []string{"level2_batch"},
 	})
 
 	go func() {
@@ -78,6 +79,7 @@ func (c *CoinbaseProvider) Start() error {
 				fmt.Println(err)
 				break
 			}
+			//log.Printf("============= MESSAGE: %s", message)
 			msg := Message{}
 			if err := json.Unmarshal(message, &msg); err != nil {
 				fmt.Println(err)

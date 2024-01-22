@@ -44,9 +44,9 @@ func mapSymbolsFor(provider string) []string {
 func main() {
 	datach := make(chan orderbook.DataFeed, 1024)
 	pvrs := []orderbook.Provider{
-		providers.NewKrakenProvider(datach, mapSymbolsFor("Kraken")),
+		//providers.NewKrakenProvider(datach, mapSymbolsFor("Kraken")),
 		providers.NewCoinbaseProvider(datach, mapSymbolsFor("Coinbase")),
-		providers.NewBinanceOrderbooks(datach, mapSymbolsFor("Binance")),
+		//providers.NewBinanceOrderbooks(datach, mapSymbolsFor("Binance")),
 	}
 
 	for _, provider := range pvrs {
