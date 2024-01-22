@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
+
 	//"time"
 
 	"github.com/4lexir4/trading/orderbook"
@@ -97,7 +99,13 @@ func main() {
 	//	)
 	//}
 
-	select {}
+	ticker := time.NewTicker(time.Microsecond * 200)
+	for {
+		calcBestSpreads(pvrs)
+		<-ticker.C
+	}
+
+	//select {}
 }
 
 type BestSpread struct {
