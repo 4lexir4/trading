@@ -20,6 +20,8 @@ type DataFeed struct {
 
 type Provider interface {
 	Start() error
+	GetOrderbooks() Orderbooks
+	Name() string
 }
 
 type Orderbooks map[string]*Book
