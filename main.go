@@ -59,41 +59,50 @@ func main() {
 		}
 	}
 
-	ticker := time.NewTicker(time.Millisecond * 50)
-	go func() {
-		for {
-			for _, p := range pvrs {
-				for _, book := range p.GetOrderbooks() {
-					var (
-						spread  = book.Spread()
-						bestAsk = book.BestAsk()
-						bestBid = book.BestBid()
-					)
-					if bestAsk == nil || bestBid == nil {
-						continue
-					}
-					datach <- orderbook.DataFeed{
-						Provider: p.Name(),
-						Symbol:   book.Symbol,
-						BestAsk:  bestAsk.Price,
-						BestBid:  bestBid.Price,
-						Spread:   spread,
-					}
-				}
-			}
-			<-ticker.C
-		}
-	}()
+	//ticker := time.NewTicker(time.Millisecond * 50)
+	//go func() {
+	//	for {
+	//		for _, p := range pvrs {
+	//			for _, book := range p.GetOrderbooks() {
+	//				var (
+	//					spread  = book.Spread()
+	//					bestAsk = book.BestAsk()
+	//					bestBid = book.BestBid()
+	//				)
+	//				if bestAsk == nil || bestBid == nil {
+	//					continue
+	//				}
+	//				datach <- orderbook.DataFeed{
+	//					Provider: p.Name(),
+	//					Symbol:   book.Symbol,
+	//					BestAsk:  bestAsk.Price,
+	//					BestBid:  bestBid.Price,
+	//					Spread:   spread,
+	//				}
+	//			}
+	//		}
+	//		<-ticker.C
+	//	}
+	//}()
 
-	for data := range datach {
-		fmt.Printf(
-			"[%s | %s] ASK %f %f BID [%f] \n",
-			data.Provider,
-			data.Symbol,
-			data.BestAsk,
-			data.BestBid,
-			data.Spread,
-		)
+	//for data := range datach {
+	//	fmt.Printf(
+	//		"[%s | %s] ASK %f %f BID [%f] \n",
+	//		data.Provider,
+	//		data.Symbol,
+	//		data.BestAsk,
+	//		data.BestBid,
+	//		data.Spread,
+	//	)
+	//}
+
+	type BestSpread struct {
+		Symbol  string
+		A       string
+		B       string
+		BestBid float64
+		BestAsk float64
+		Spread  float64
 	}
 
 	select {}
