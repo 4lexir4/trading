@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/4lexir4/trading/orderbook"
 	"github.com/4lexir4/trading/providers"
@@ -46,6 +47,15 @@ func main() {
 		providers.NewKrakenProvider(datach, mapSymbolsFor("Kraken")),
 		//providers.NewCoinbaseProvider(datach, mapSymbolsFor("Coinbase")),
 		//providers.NewBinanceOrderbooks(datach, mapSymbolsFor("Binance")),
+	}
+
+	ticker := time.NewTicker(time.Millisecond * 100)
+	for {
+		for _, p := range pvrs {
+      go 
+
+		}
+		<-ticker.C
 	}
 
 	for _, provider := range pvrs {
