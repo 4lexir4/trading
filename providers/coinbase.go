@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/4lexir4/trading/orderbook"
 	"github.com/gorilla/websocket"
@@ -37,6 +36,21 @@ func (c *CoinbaseProvider) handleUpdate(symbol string, changes []SnapshotChange)
 			c.Orderbooks[symbol].Bids.Update(price, size)
 		}
 	}
+
+	var (
+		book    = c.Orderbooks[symbol]
+		spread  = book.Spread()
+		bestAsk = book.BestAsk().Price
+		bestBid = book.BestBid().Price
+	)
+	c.feedch <- orderbook.DataFeed{
+		Provider: "Coinbase",
+		Symbol:   book.Symbol,
+		BestAsk:  bestAsk,
+		BestBid:  bestBid,
+		Spread:   spread,
+	}
+
 	return nil
 }
 
@@ -52,28 +66,8 @@ func (c *CoinbaseProvider) handleSnapshot(symbol string, asks []SnapshotEntry, b
 	return nil
 }
 
-func (c *CoinbaseProvider) feedLoop() {
-	time.Sleep(time.Second * 2)
-	ticker := time.NewTicker(100 * time.Millisecond)
-	for {
-		for _, book := range c.Orderbooks {
-			spread := book.Spread()
-			bestAsk := book.BestAsk().Price
-			bestBid := book.BestBid().Price
-			c.feedch <- orderbook.DataFeed{
-				Provider: "Coinbase",
-				Symbol:   book.Symbol,
-				BestAsk:  bestAsk,
-				BestBid:  bestBid,
-				Spread:   spread,
-			}
-		}
-		<-ticker.C
-	}
-}
-
 func (c *CoinbaseProvider) Start() error {
-	ws, _, err := websocket.DefaultDialer.Dial("wss://ws-feed.exchange.coingase.com", nil)
+	ws, _, err := websocket.DefaultDialer.Dial("wss://ws-feed.exchange.coinbase.com", nil)
 	if err != nil {
 		return err
 	}
@@ -104,8 +98,6 @@ func (c *CoinbaseProvider) Start() error {
 			}
 		}
 	}()
-
-	go c.feedLoop()
 
 	return nil
 }
