@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/4lexir4/trading/orderbook"
+	"github.com/bufbuild/buf/private/pkg/tmp"
 	"github.com/gorilla/websocket"
 )
 
@@ -70,9 +71,30 @@ func (s *Server) registerConn(ws *WSConn) {
 }
 
 func (s *Server) writeLoop() {
-	for data := range s.bsch {
-		for ws := range s.conns {
-			ws.WriteJSON(data)
+	for data := range s.crossSpreadch {
+		for symbol, spreads := range data {
+			for ws := range s.conns[symbol] {
+				if err := ws.WriteJSON(spreads); err != nil {
+					fmt.Println("socket write error", err)
+					s.unregisterConn(ws)
+				}
+			}
+		}
+	}
+}
+
+func (s *Server) readLoop(ws *websocket.Conn) {
+	defer ws.Close()
+
+	for {
+		msg := Message{}
+		if err := ws.ReadJSON(&msg); err != nil {
+			fmt.Println("socket read error:", err)
+			break
+		}
+		if err := s.handleSocketMessage(ws, msg); err != nil {
+			fmt.Println("handle msg error:", err)
+			break
 		}
 	}
 }
