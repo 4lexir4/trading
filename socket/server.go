@@ -10,6 +10,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type MessageSpreads struct {
+	Symbol  string                 `json:"symbol"`
+	Spreads []orderbook.BestSpread `json:"spreads"`
+}
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
