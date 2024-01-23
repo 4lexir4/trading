@@ -37,14 +37,16 @@ func NewServer(bsch chan map[string][]orderbook.BestSpread) *Server {
 }
 
 func (s *Server) Start() error {
-	http.HandleFunc("/bestspreads", s.handleBestSpreads)
+	http.HandleFunc("/", s.handleWS)
 	go s.writeLoop()
-	return http.ListenAndServe(":3000", nil)
+	return http.ListenAndServe(":4000", nil)
 }
 
-func (s *Server) unregisterConn(ws *websocket.Conn) {
+func (s *Server) unregisterConn(ws *WSConn) {
 	s.lock.Lock()
-	delete(s.conns, ws)
+	for _, symbol := range ws.Symbols {
+		delete(s.conns[symbol], ws)
+	}
 	s.lock.Unlock()
 
 	fmt.Printf("unregister connection %s\n", ws.RemoteAddr())
@@ -52,12 +54,13 @@ func (s *Server) unregisterConn(ws *websocket.Conn) {
 	ws.Close()
 }
 
-func (s *Server) registerConn(ws *websocket.Conn) {
+func (s *Server) registerConn(ws *WSConn) {
 	s.lock.Lock()
-	s.conns[ws] = true
-	s.lock.Unlock()
-
-	fmt.Printf("register connection %s\n", ws.RemoteAddr())
+	defer s.lock.Unlock()
+	for _, symbol := range ws.Symbols {
+		s.conns[symbol][ws] = true
+		fmt.Printf("register connection to symbol %s %s\n", symbol, ws.RemoteAddr())
+	}
 }
 
 func (s *Server) writeLoop() {

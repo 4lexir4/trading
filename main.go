@@ -75,17 +75,20 @@ func main() {
 	socketServer.Start()
 }
 
-func calcBestSpreads(datach chan orderbook.BestSpread, pvrs []orderbook.Provider) {
-	for i := 0; i < len(pvrs); i++ {
-		a := pvrs[i]
-		var b orderbook.Provider
-		if len(pvrs)-1 == i {
-			b = pvrs[0]
-		} else {
-			b = pvrs[i+1]
-		}
+func calcBestSpreads(datach chan map[string][]orderbook.BestSpread, pvrs []orderbook.Provider) {
+	data := map[string][]orderbook.BestSpread{}
 
-		for _, symbol := range symbols {
+	for _, symbol := range symbols {
+		bestSpreads := []orderbook.BestSpread{}
+		for i := 0; i < len(pvrs); i++ {
+			a := pvrs[i]
+			var b orderbook.Provider
+			if len(pvrs)-1 == i {
+				b = pvrs[0]
+			} else {
+				b = pvrs[i+1]
+			}
+
 			bookA := a.GetOrderbooks()[getSymbolForProvider(a.Name(), symbol)]
 			bookB := b.GetOrderbooks()[getSymbolForProvider(b.Name(), symbol)]
 
