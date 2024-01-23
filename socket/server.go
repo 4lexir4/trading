@@ -25,10 +25,10 @@ type Server struct {
 	conns map[string]map[*WSConn]bool
 }
 
-func NewServer(bsch chan orderbook.BestSpread) *Server {
+func NewServer(bsch chan map[string][]orderbook.BestSpread) *Server {
 	return &Server{
 		bsch:  bsch,
-		conns: make(map[*websocket.Conn]bool),
+		conns: make(map[string]map[*WSConn]bool),
 	}
 }
 
