@@ -64,9 +64,9 @@ func main() {
 	bestSpreadch := make(chan map[string][]orderbook.BestSpread, 1024)
 	crossSpreadch := make(chan map[string][]orderbook.CrossSpread, 1024)
 	go func() {
-		ticker := time.NewTicker(time.Microsecond * 200)
+		ticker := time.NewTicker(time.Microsecond * 100)
 		for {
-			calcBestSpreads(bestSpreadch, pvrs)
+			calcCrossSpreads(bestSpreadch, pvrs)
 			<-ticker.C
 		}
 	}()
@@ -75,8 +75,8 @@ func main() {
 	socketServer.Start()
 }
 
-func calcBestSpreads(datach chan map[string][]orderbook.BestSpread, pvrs []orderbook.Provider) {
-	data := map[string][]orderbook.BestSpread{}
+func calcCrossSpreads(datach chan map[string][]orderbook.BestSpread, pvrs []orderbook.Provider) {
+	data := map[string][]orderbook.CrossSpread{}
 
 	for _, symbol := range symbols {
 		bestSpreads := []orderbook.BestSpread{}
