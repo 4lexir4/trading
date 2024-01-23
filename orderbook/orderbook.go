@@ -16,6 +16,13 @@ type BestPrice struct {
 	Size     float64
 }
 
+type CrossSpread struct {
+	Smybol  string
+	BestAsk BestPrice
+	BestBid BestPrice
+	Spread  float64
+}
+
 type BestSpread struct {
 	Symbol  string
 	A       string
