@@ -8,7 +8,7 @@ import (
 	"github.com/4lexir4/trading/orderbook"
 	"github.com/4lexir4/trading/providers"
 	"github.com/4lexir4/trading/socket"
-	"github.com/4lexir4/trading/util"
+	//"github.com/4lexir4/trading/util"
 )
 
 var symbols = []string{
@@ -111,7 +111,7 @@ func calcBestSpreads(datach chan orderbook.BestSpread, pvrs []orderbook.Provider
 				best.BestAsk = bookA.BestAsk().Price
 			}
 
-			best.Spread = util.Round(best.BestAsk-best.BestBid, 10000)
+			best.Spread = best.BestAsk - best.BestBid //util.Round(best.BestAsk-best.BestBid, 10000)
 
 			datach <- best
 		}
