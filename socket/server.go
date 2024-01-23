@@ -10,6 +10,12 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type Message struct {
+	Type    string   `json:"type"`
+	Topic   string   `json:"topic"`
+	Symbols []string `json:"symbols"`
+}
+
 type MessageSpreads struct {
 	Symbol  string                 `json:"symbol"`
 	Spreads []orderbook.BestSpread `json:"spreads"`
@@ -20,15 +26,15 @@ var upgrader = websocket.Upgrader{
 }
 
 type Server struct {
-	bsch  chan map[string][]orderbook.BestSpread
-	lock  sync.RWMutex
-	conns map[string]map[*WSConn]bool
+	crossSpreadch chan map[string][]orderbook.CrossSpread
+	lock          sync.RWMutex
+	conns         map[string]map[*WSConn]bool
 }
 
-func NewServer(bsch chan map[string][]orderbook.BestSpread) *Server {
+func NewServer(crossSpreadCh chan map[string][]orderbook.CrossSpread) *Server {
 	s := &Server{
-		bsch:  bsch,
-		conns: make(map[string]map[*WSConn]bool),
+		crossSpreadch: crossSpreadCh,
+		conns:         make(map[string]map[*WSConn]bool),
 	}
 	for _, symbol := range symbols {
 		s.conns[symbol] = map[*WSConn]bool{}
