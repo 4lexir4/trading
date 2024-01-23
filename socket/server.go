@@ -20,9 +20,9 @@ var upgrader = websocket.Upgrader{
 }
 
 type Server struct {
-	bsch  chan orderbook.BestSpread
+	bsch  chan map[string][]orderbook.BestSpread
 	lock  sync.RWMutex
-	conns map[*websocket.Conn]bool
+	conns map[string]map[*WSConn]bool
 }
 
 func NewServer(bsch chan orderbook.BestSpread) *Server {
