@@ -99,6 +99,16 @@ func (s *Server) readLoop(ws *websocket.Conn) {
 	}
 }
 
+funct (s *Server) handleSocketMessage(ws *websocket.Conn, msg Message) error {
+  wsConn := &WSConn {
+    Conn: ws, 
+    Topic: msg.Topic,
+    Symbols: msg.Symbols,
+  }
+
+  s.registerConn(wsConn)
+}
+
 func (s *Server) handleBestSpreads(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
