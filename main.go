@@ -61,8 +61,8 @@ func main() {
 		}
 	}
 
-	bestSpreadch := make(chan orderbook.BestSpread, 1024)
-
+	bestSpreadch := make(chan map[string][]orderbook.BestSpread, 1024)
+	crossSpreadch := make(chan map[string][]orderbook.CrossSpread, 1024)
 	go func() {
 		ticker := time.NewTicker(time.Microsecond * 200)
 		for {
