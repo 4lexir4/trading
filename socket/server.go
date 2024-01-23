@@ -26,10 +26,14 @@ type Server struct {
 }
 
 func NewServer(bsch chan map[string][]orderbook.BestSpread) *Server {
-	return &Server{
+	s := &Server{
 		bsch:  bsch,
 		conns: make(map[string]map[*WSConn]bool),
 	}
+	for _, symbol := range symbols {
+		s.conns[symbol] = map[*WSConn]bool{}
+	}
+	return s
 }
 
 func (s *Server) Start() error {
