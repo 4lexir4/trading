@@ -15,6 +15,7 @@ var symbols = []string{
 	"BTCUSD",
 	"ETHUSD",
 	"ADAUSD",
+	"DOGEUSD",
 }
 
 var pairs = map[string]map[string]string{
@@ -22,6 +23,11 @@ var pairs = map[string]map[string]string{
 		"Binance":  "ADAUSDT",
 		"Kraken":   "ADA/USD",
 		"Coinbase": "ADA-USD",
+	},
+	"DOGEUSD": {
+		"Binance":  "DOGEUSDT",
+		"Kraken":   "XDG/USD",
+		"Coinbase": "DOGE-USD",
 	},
 	"BTCUSD": {
 		"Binance":  "BTCUSDT",
@@ -61,35 +67,37 @@ func main() {
 		}
 	}
 
-	bestSpreadch := make(chan orderbook.BestSpread, 1024)
-
+	crossSpreadch := make(chan map[string][]orderbook.CrossSpread, 1024)
 	go func() {
-		ticker := time.NewTicker(time.Microsecond * 200)
+		ticker := time.NewTicker(time.Microsecond * 100)
 		for {
-			calcBestSpreads(bestSpreadch, pvrs)
+			calcCrossSpreads(crossSpreadch, pvrs)
 			<-ticker.C
 		}
 	}()
 
-	socketServer := socket.NewServer(bestSpreadch)
+	socketServer := socket.NewServer(crossSpreadch)
 	socketServer.Start()
 }
 
-func calcBestSpreads(datach chan orderbook.BestSpread, pvrs []orderbook.Provider) {
-	for i := 0; i < len(pvrs); i++ {
-		a := pvrs[i]
-		var b orderbook.Provider
-		if len(pvrs)-1 == i {
-			b = pvrs[0]
-		} else {
-			b = pvrs[i+1]
-		}
+func calcCrossSpreads(datach chan map[string][]orderbook.CrossSpread, pvrs []orderbook.Provider) {
+	data := map[string][]orderbook.CrossSpread{}
 
-		for _, symbol := range symbols {
+	for _, symbol := range symbols {
+		crossSpreads := []orderbook.CrossSpread{}
+		for i := 0; i < len(pvrs); i++ {
+			a := pvrs[i]
+			var b orderbook.Provider
+			if len(pvrs)-1 == i {
+				b = pvrs[0]
+			} else {
+				b = pvrs[i+1]
+			}
+
 			bookA := a.GetOrderbooks()[getSymbolForProvider(a.Name(), symbol)]
 			bookB := b.GetOrderbooks()[getSymbolForProvider(b.Name(), symbol)]
 
-			best := orderbook.BestSpread{
+			crossSpread := orderbook.CrossSpread{
 				Symbol: symbol,
 			}
 
@@ -99,21 +107,26 @@ func calcBestSpreads(datach chan orderbook.BestSpread, pvrs []orderbook.Provider
 				continue
 			}
 
+			bestAsk := orderbook.BestPrice{}
+			bestBid := orderbook.BestPrice{}
 			if bestBidA.Price < bestBidB.Price {
-				best.A = a.Name()
-				best.B = b.Name()
-				best.BestBid = bestBidA.Price
-				best.BestAsk = bookB.BestAsk().Price
+				bestAsk.Provider = a.Name()
+				bestBid.Provider = b.Name()
+				bestBid.Price = bestBidA.Price
+				bestAsk.Price = bookB.BestAsk().Price
 			} else {
-				best.A = b.Name()
-				best.B = a.Name()
-				best.BestBid = bestBidB.Price
-				best.BestAsk = bookA.BestAsk().Price
+				bestAsk.Provider = b.Name()
+				bestBid.Provider = a.Name()
+				bestBid.Price = bestBidB.Price
+				bestAsk.Price = bookA.BestAsk().Price
 			}
 
-			best.Spread = best.BestAsk - best.BestBid //util.Round(best.BestAsk-best.BestBid, 10000)
-
-			datach <- best
+			crossSpread.Spread = bestAsk.Price - bestBid.Price //util.Round(bestAsk.Price - bestBid.Price, 10000)
+			crossSpread.BestAsk = bestAsk
+			crossSpread.BestBid = bestBid
+			crossSpreads = append(crossSpreads, crossSpread)
 		}
+		data[symbol] = crossSpreads
 	}
+	datach <- data
 }

@@ -10,12 +10,16 @@ import (
 	"github.com/VictorLowther/btree"
 )
 
-type BestSpread struct {
+type BestPrice struct {
+	Provider string
+	Price    float64
+	Size     float64
+}
+
+type CrossSpread struct {
 	Symbol  string
-	A       string
-	B       string
-	BestBid float64
-	BestAsk float64
+	BestAsk BestPrice
+	BestBid BestPrice
 	Spread  float64
 }
 
