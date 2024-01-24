@@ -7,9 +7,21 @@ import (
 	"sync"
 
 	"github.com/4lexir4/trading/orderbook"
-	"github.com/bufbuild/buf/private/pkg/tmp"
 	"github.com/gorilla/websocket"
 )
+
+var symbols = []string{
+	"BTCUSD",
+	"ETHUSD",
+	"ADAUSD",
+	"DOGEUSD",
+}
+
+type WSConn struct {
+	*websocket.Conn
+	Topic   string
+	Symbols []string
+}
 
 type Message struct {
 	Type    string   `json:"type"`
@@ -18,8 +30,8 @@ type Message struct {
 }
 
 type MessageSpreads struct {
-	Symbol  string                 `json:"symbol"`
-	Spreads []orderbook.BestSpread `json:"spreads"`
+	Symbol  string                  `json:"symbol"`
+	Spreads []orderbook.CrossSpread `json:"spreads"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -99,14 +111,14 @@ func (s *Server) readLoop(ws *websocket.Conn) {
 	}
 }
 
-funct (s *Server) handleSocketMessage(ws *websocket.Conn, msg Message) error {
-  wsConn := &WSConn {
-    Conn: ws, 
-    Topic: msg.Topic,
-    Symbols: msg.Symbols,
-  }
+func (s *Server) handleSocketMessage(ws *websocket.Conn, msg Message) error {
+	wsConn := &WSConn{
+		Conn:    ws,
+		Topic:   msg.Topic,
+		Symbols: msg.Symbols,
+	}
 
-  s.registerConn(wsConn)
+	s.registerConn(wsConn)
 }
 
 func (s *Server) handleBestSpreads(w http.ResponseWriter, r *http.Request) {
