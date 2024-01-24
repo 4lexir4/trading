@@ -78,7 +78,7 @@ func calcCrossSpreads(datach chan map[string][]orderbook.CrossSpread, pvrs []ord
 	data := map[string][]orderbook.CrossSpread{}
 
 	for _, symbol := range symbols {
-		bestSpreads := []orderbook.BestSpread{}
+		crossSpreads := []orderbook.CrossSpread{}
 		for i := 0; i < len(pvrs); i++ {
 			a := pvrs[i]
 			var b orderbook.Provider
@@ -91,7 +91,7 @@ func calcCrossSpreads(datach chan map[string][]orderbook.CrossSpread, pvrs []ord
 			bookA := a.GetOrderbooks()[getSymbolForProvider(a.Name(), symbol)]
 			bookB := b.GetOrderbooks()[getSymbolForProvider(b.Name(), symbol)]
 
-			best := orderbook.BestSpread{
+			best := orderbook.CrossSpread{
 				Symbol: symbol,
 			}
 
@@ -101,11 +101,13 @@ func calcCrossSpreads(datach chan map[string][]orderbook.CrossSpread, pvrs []ord
 				continue
 			}
 
+			bestAsk := orderbook.BestPrice{}
+			bestBid := orderbook.BestPrice{}
 			if bestBidA.Price < bestBidB.Price {
-				best.A = a.Name()
-				best.B = b.Name()
-				best.BestBid = bestBidA.Price
-				best.BestAsk = bookB.BestAsk().Price
+				bestAsk.Provider = a.Name()
+				bestBid.Provider = b.Name()
+				bestBid.Price = bestBidA.Price
+				bestAsk.Price = bookB.BestAsk().Price
 			} else {
 				best.A = b.Name()
 				best.B = a.Name()
@@ -114,8 +116,17 @@ func calcCrossSpreads(datach chan map[string][]orderbook.CrossSpread, pvrs []ord
 			}
 
 			best.Spread = best.BestAsk - best.BestBid //util.Round(best.BestAsk-best.BestBid, 10000)
+			crossSpreads = append(crossSpreads, best)
 
-			datach <- best
 		}
+		data[symbol] = crossSpreads
 	}
+	datach <- data
+}
+
+func minMaxLimit(a, b *orderbook.Limit) (*orderbook.Limit, *orderbook.Limit) {
+	if a.Price <= b.Price {
+		return a, b
+	}
+	return b, a
 }
