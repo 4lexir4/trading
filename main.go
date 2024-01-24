@@ -125,7 +125,6 @@ func calcCrossSpreads(datach chan map[string][]orderbook.CrossSpread, pvrs []ord
 			crossSpread.BestAsk = bestAsk
 			crossSpread.BestBid = bestBid
 			crossSpreads = append(crossSpreads, crossSpread)
-
 		}
 		data[symbol] = crossSpreads
 	}
