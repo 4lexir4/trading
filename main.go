@@ -15,6 +15,7 @@ var symbols = []string{
 	"BTCUSD",
 	"ETHUSD",
 	"ADAUSD",
+	"DOGEUSD",
 }
 
 var pairs = map[string]map[string]string{
@@ -22,6 +23,11 @@ var pairs = map[string]map[string]string{
 		"Binance":  "ADAUSDT",
 		"Kraken":   "ADA/USD",
 		"Coinbase": "ADA-USD",
+	},
+	"DOGEUSD": {
+		"Binance":  "DOGEUSDT",
+		"Kraken":   "XDG/USD",
+		"Coinbase": "DOGE-USD",
 	},
 	"BTCUSD": {
 		"Binance":  "BTCUSDT",

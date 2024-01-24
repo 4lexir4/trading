@@ -121,6 +121,16 @@ func (s *Server) handleSocketMessage(ws *websocket.Conn, msg Message) error {
 	s.registerConn(wsConn)
 }
 
+func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("websocket upgrade error:", err)
+		return
+	}
+
+	go s.readLoop(ws)
+}
+
 func (s *Server) handleBestSpreads(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
