@@ -86,7 +86,11 @@ func (s *Server) writeLoop() {
 	for data := range s.crossSpreadch {
 		for symbol, spreads := range data {
 			for ws := range s.conns[symbol] {
-				if err := ws.WriteJSON(spreads); err != nil {
+				msg := MessageSpreads{
+					Symbol:  symbol,
+					Spreads: spreads,
+				}
+				if err := ws.WriteJSON(msg); err != nil {
 					fmt.Println("socket write error", err)
 					s.unregisterConn(ws)
 				}
